@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Page
+from .models import Page, Region, District, Setting
 
 
 class PagesListSerializer(serializers.ModelSerializer):
@@ -11,3 +11,20 @@ class PageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = ['slug', 'title', 'content', 'created_at', 'updated_at']
+
+class DistrictSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ['id', 'name']
+
+class RegionSerializer(serializers.ModelSerializer):
+    districts = DistrictSerializer(many=True)
+
+    class Meta:
+        model = Region
+        fields = ['id', 'name', 'districts']
+
+class CommonSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Setting
+        fields = ['phone', 'support_email', 'working_hours', 'app_version', 'maintenance_code']
