@@ -4,7 +4,7 @@ from .models import Page, Setting
 
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
-    list_display = ['slug', 'title', 'created_at', 'updated_at']
+    list_display = ['slug', 'title', 'created_time', 'updated_time']
     search_fields = ['slug', 'title', 'content']
     exclude = ['slug']
 

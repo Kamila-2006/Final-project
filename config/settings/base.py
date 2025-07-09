@@ -113,7 +113,6 @@ USE_TZ = True
 LANGUAGES = (
     ("uz", _("Uzbek")),
     ("ru", _("Russian")),
-    ("en", _("English")),
 )
 
 MODELTRANSLATION_DEFAULT_LANGUAGE = "uz"
@@ -136,7 +135,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "accounts.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 
