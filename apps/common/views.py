@@ -17,7 +17,7 @@ class PageDetailView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]
 
 class RegionsDistrictsView(generics.ListAPIView):
-    queryset = Region.objects.all()
+    queryset = Region.objects.all().prefetch_related('districts')
     serializer_class = RegionSerializer
     pagination_class = CustomPagination
 
