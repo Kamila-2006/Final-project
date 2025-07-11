@@ -10,7 +10,7 @@ class PagesListSerializer(serializers.ModelSerializer):
 class PageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = ['slug', 'title', 'content', 'created_at', 'updated_at']
+        fields = ['slug', 'title', 'content', 'created_time', 'updated_time']
 
 class DistrictSerializer(serializers.ModelSerializer):
     class Meta:

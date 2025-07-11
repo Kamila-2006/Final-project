@@ -14,6 +14,7 @@ class UserManager(BaseUserManager):
     def create_user(self, **extra_fields):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault("role", 'seller')
         phone_number = extra_fields.pop("phone_number", None)
         password = extra_fields.pop("password")
         return self._create_user(phone_number=phone_number, password=password, **extra_fields)

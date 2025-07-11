@@ -41,6 +41,7 @@ urlpatterns = [
 
 urlpatterns += [
     path("common/", include("common.urls")),
+    path("accounts/", include("accounts.urls")),
 ]
 
 if django_settings_module == "development":
