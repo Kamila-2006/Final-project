@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 from .models import User, Address
+from store.models import Category
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -7,17 +9,14 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = ['name', 'lat', 'long']
 
-class RegisterSerializer(serializers.ModelSerializer):
+class SellerRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    address = AddressSerializer(write_only=True)
+    address = AddressSerializer()
+    category = PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = User
-        fields = ('full_name', 'phone_number', 'password', 'role', 'profile_photo', 'address')
-        extra_kwargs = {
-            'role': {'required': False},
-            'profile_photo': {'required': False},
-        }
+        fields = ('full_name', 'project_name', 'category', 'phone_number', 'password', 'address')
 
     def validate_phone_number(self, value):
         if User.objects.filter(phone_number=value).exists():
@@ -30,9 +29,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         Address.objects.create(user=user, **address_data)
         return user
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    address = AddressSerializer()
+class SellerRegistrationResponseSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField(source='category.id')
+    address = serializers.CharField(source='address.name')
 
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'phone_number', 'profile_photo', 'address', 'created_at']
+        fields = ['id', 'full_name', 'project_name', 'category_id', 'phone_number', 'address', 'status']

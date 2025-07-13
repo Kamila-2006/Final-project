@@ -21,27 +21,27 @@ class CustomUserAdmin(UserAdmin):
     model = User
     list_display = [
         "full_name",
+        "project_name",
+        "category",
         "phone_number",
         "profile_photo",
         "role",
         "is_active",
         "is_staff",
-        "created_at",
+        "created_time",
     ]
     fieldsets = (
-        (None, {"fields": ("full_name", "phone_number", "password")}),
+        (None, {"fields": ("full_name", "phone_number", "password", "role")}),
         (
             "Personal info",
             {
                 "fields": (
-                    # "full_name",
-                    # "phone_number",
                     "profile_photo",
                 )
             },
         ),
         ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser")}),
-        ("Important dates", {"fields": ("created_at",)}),
+        ("Important dates", {"fields": ("created_time",)}),
     )
     add_fieldsets = (
         (
@@ -51,6 +51,8 @@ class CustomUserAdmin(UserAdmin):
                 "fields": (
                     "phone_number",
                     "full_name",
+                    "project_name",
+                    "category",
                     "password1",
                     "password2",
                     "role",
@@ -61,4 +63,4 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("full_name", "phone_number")
     ordering = ("phone_number",)
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_time',)
