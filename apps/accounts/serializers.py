@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.relations import PrimaryKeyRelatedField
 from .models import User, Address
 from store.models import Category
@@ -36,3 +37,29 @@ class SellerRegistrationResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'full_name', 'project_name', 'category_id', 'phone_number', 'address', 'status']
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = User.USERNAME_FIELD
+
+    def validate(self, attrs):
+        attrs['username'] = attrs.get('phone_number')
+        data = super().validate(attrs)
+
+        user = self.user
+
+        response_data = {
+            'access_token': data['access'],
+            'refresh_token': data['refresh'],
+            'user': {
+                'id': user.id,
+                'full_name': user.full_name,
+                'phone_number': user.phone_number,
+            }
+        }
+
+        return response_data
+
+    def to_internal_value(self, data):
+        if 'phone_number' in data:
+            data['username'] = data['phone_number']
+        return super().to_internal_value(data)
