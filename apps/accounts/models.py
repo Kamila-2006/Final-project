@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from common.base_models import BaseModel
 from .managers import UserManager
 from store.models import Category
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin, BaseModel):
 
     ROLE_CHOICES = [
         ('super_admin', 'Super Admin'),
@@ -27,8 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='seller')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    created_time = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=8, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending')
 
     objects = UserManager()
 

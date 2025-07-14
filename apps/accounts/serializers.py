@@ -11,13 +11,12 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = ['name', 'lat', 'long']
 
 class SellerRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
     address = AddressSerializer()
     category = PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = User
-        fields = ('full_name', 'project_name', 'category', 'phone_number', 'password', 'address')
+        fields = ('full_name', 'project_name', 'category', 'phone_number', 'address')
 
     def validate_phone_number(self, value):
         if User.objects.filter(phone_number=value).exists():

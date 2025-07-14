@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
         "created_time",
     ]
     fieldsets = (
-        (None, {"fields": ("full_name", "phone_number", "password", "role")}),
+        (None, {"fields": ("full_name", "project_name", "category", "phone_number", "password", "role")}),
         (
             "Personal info",
             {
