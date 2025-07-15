@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-
 from .models import Address
+
 
 User = get_user_model()
 
@@ -23,6 +23,7 @@ class CustomUserAdmin(UserAdmin):
         "full_name",
         "project_name",
         "category",
+        "status",
         "phone_number",
         "profile_photo",
         "role",
@@ -31,7 +32,7 @@ class CustomUserAdmin(UserAdmin):
         "created_time",
     ]
     fieldsets = (
-        (None, {"fields": ("full_name", "project_name", "category", "phone_number", "password", "role")}),
+        (None, {"fields": ("full_name", "project_name", "category", "status", "phone_number", "password", "role")}),
         (
             "Personal info",
             {

@@ -46,6 +46,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         user = self.user
 
+        if user.status != 'approved':
+            raise serializers.ValidationError("Your account is not approved yet.")
+
         response_data = {
             'access_token': data['access'],
             'refresh_token': data['refresh'],
