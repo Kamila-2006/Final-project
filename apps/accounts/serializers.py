@@ -65,3 +65,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if 'phone_number' in data:
             data['username'] = data['phone_number']
         return super().to_internal_value(data)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    address = AddressSerializer()
+
+    class Meta:
+        model = User
+        fields = ['id', 'full_name', 'phone_number', 'profile_photo', 'address']
+
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop('address', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if address_data:
+            address, created = Address.objects.get_or_create(user=instance)
+            for attr, value in address_data.items():
+                setattr(address, attr, value)
+            address.save()
+
+        return instance
