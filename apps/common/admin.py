@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Page, Setting, Region, District
 from modeltranslation.admin import TabbedTranslationAdmin
+from .models import Page, Setting, Region, District
 
 
 @admin.register(Page)
