@@ -40,8 +40,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path("common/", include("common.urls")),
-    path("accounts/", include("accounts.urls")),
+    path("common/", include("common.urls"), name='common'),
+    path("accounts/", include("accounts.urls"), name='accounts'),
+    path("store/", include("store.urls"), name='store'),
 ]
 
 if django_settings_module == "development":
