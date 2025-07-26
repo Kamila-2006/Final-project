@@ -7,15 +7,18 @@ class PagesListSerializer(serializers.ModelSerializer):
         model = Page
         fields = ['slug', 'title']
 
+
 class PageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = ['slug', 'title', 'content', 'created_time', 'updated_time']
 
+
 class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = District
         fields = ['id', 'name']
+
 
 class RegionSerializer(serializers.ModelSerializer):
     districts = DistrictSerializer(many=True)
@@ -23,6 +26,7 @@ class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Region
         fields = ['id', 'name', 'districts']
+
 
 class CommonSettingsSerializer(serializers.ModelSerializer):
     class Meta:

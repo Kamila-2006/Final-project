@@ -1,14 +1,19 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.relations import PrimaryKeyRelatedField
-from .models import User, Address
+from .models import Address
 from store.models import Category
+
+
+User = get_user_model()
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['name', 'lat', 'long']
+
 
 class SellerRegistrationSerializer(serializers.ModelSerializer):
     address = AddressSerializer()
@@ -29,6 +34,7 @@ class SellerRegistrationSerializer(serializers.ModelSerializer):
         Address.objects.create(user=user, **address_data)
         return user
 
+
 class SellerRegistrationResponseSerializer(serializers.ModelSerializer):
     category_id = serializers.IntegerField(source='category.id')
     address = serializers.CharField(source='address.name')
@@ -36,6 +42,7 @@ class SellerRegistrationResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'full_name', 'project_name', 'category_id', 'phone_number', 'address', 'status']
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = User.USERNAME_FIELD
@@ -65,6 +72,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if 'phone_number' in data:
             data['username'] = data['phone_number']
         return super().to_internal_value(data)
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     address = AddressSerializer()

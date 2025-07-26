@@ -1,6 +1,9 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
-from accounts.models import User
+
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -13,6 +16,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Ad(models.Model):
     slug = models.SlugField(unique=True)
@@ -32,6 +36,7 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class AdPhoto(models.Model):
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='photos')

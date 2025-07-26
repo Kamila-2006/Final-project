@@ -6,6 +6,7 @@ from .models import Category, Ad
 class CategoryTranslationOptions(TranslationOptions):
     fields = ('name',)
 
+
 @register(Ad)
 class AdTranslationOptions(TranslationOptions):
     fields = ('name', 'description')

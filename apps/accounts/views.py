@@ -6,11 +6,13 @@ from rest_framework_simplejwt.views import TokenVerifyView
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
+from common.utils.custom_response_decorator import custom_response
 from .serializers import SellerRegistrationSerializer, SellerRegistrationResponseSerializer, \
     CustomTokenObtainPairSerializer, UserProfileSerializer
 from .models import User
 
 
+@custom_response
 class SellerRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = SellerRegistrationSerializer
@@ -23,9 +25,13 @@ class SellerRegistrationView(generics.CreateAPIView):
         response_serializer = SellerRegistrationResponseSerializer(user)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+
+@custom_response
 class CustomLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+
+@custom_response
 class CustomTokenVerifyView(TokenVerifyView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -45,6 +51,8 @@ class CustomTokenVerifyView(TokenVerifyView):
                 "user_id": None
             }, status=status.HTTP_401_UNAUTHORIZED)
 
+
+@custom_response
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -52,6 +60,8 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
 
+
+@custom_response
 class UserEditView(generics.UpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]

@@ -16,6 +16,7 @@ class RegionTranslationOptions(TranslationOptions):
 class SettingTranslationOptions(TranslationOptions):
     fields = ('working_hours',)
 
+
 @register(Page)
 class PageTranslationOptions(TranslationOptions):
     fields = ('title', 'content')

@@ -1,16 +1,20 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from common.utils.custom_response_decorator import custom_response
 from .models import Category, Ad
 from .serializers import CategorySerializer, AdCreateSerializer, AdResponseSerializer, AdDetailSerializer
 from common.pagination import CustomPagination
 
 
+@custom_response
 class CategoriesListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = CustomPagination
 
+
+@custom_response
 class AdCreateView(generics.CreateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
@@ -23,6 +27,8 @@ class AdCreateView(generics.CreateAPIView):
         response_serializer = AdResponseSerializer(ad)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+
+@custom_response
 class AdDetailView(generics.RetrieveAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdDetailSerializer

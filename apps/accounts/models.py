@@ -38,6 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     def __str__(self):
         return self.full_name
 
+
 class Address(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='address')
     name = models.TextField()

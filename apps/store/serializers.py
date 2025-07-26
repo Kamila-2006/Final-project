@@ -1,6 +1,9 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from .models import Category, Ad, AdPhoto
-from accounts.models import User
+
+
+User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -8,15 +11,18 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'icon', 'products_count']
 
+
 class CategoryShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
 
+
 class AdPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdPhoto
         fields = ['image']
+
 
 class AdCreateSerializer(serializers.ModelSerializer):
     photos = serializers.ListField(child=serializers.URLField(), write_only=True)
@@ -34,10 +40,12 @@ class AdCreateSerializer(serializers.ModelSerializer):
         AdPhoto.objects.bulk_create([AdPhoto(ad=ad, image=url) for url in photos_data])
         return ad
 
+
 class SellerShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'full_name', 'phone_number', 'profile_photo']
+
 
 class AdResponseSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
@@ -60,6 +68,7 @@ class AdResponseSerializer(serializers.ModelSerializer):
     def get_address(self, obj):
         seller_address = obj.seller.address
         return seller_address.name
+
 
 class AdDetailSerializer(serializers.ModelSerializer):
     photos = AdPhotoSerializer(many=True, read_only=True)
