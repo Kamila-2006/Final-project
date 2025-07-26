@@ -4,21 +4,21 @@ from rest_framework import status
 from common.utils.custom_response_decorator import custom_response
 from .models import Category, Ad
 from .serializers import CategorySerializer, AdCreateSerializer, AdResponseSerializer, AdDetailSerializer
-from common.pagination import CustomPagination
+from .pagination import CategoryPagination
 
 
 @custom_response
 class CategoriesListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = CustomPagination
+    pagination_class = CategoryPagination
 
 
 @custom_response
 class AdCreateView(generics.CreateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
-    pagination_class = CustomPagination
+    pagination_class = CategoryPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
