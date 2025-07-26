@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenVerifyView
@@ -9,7 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from common.utils.custom_response_decorator import custom_response
 from .serializers import SellerRegistrationSerializer, SellerRegistrationResponseSerializer, \
     CustomTokenObtainPairSerializer, UserProfileSerializer
-from .models import User
+
+
+User = get_user_model()
 
 
 @custom_response
