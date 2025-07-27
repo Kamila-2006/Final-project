@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
-from common.base_models import BaseModel
+from common.models import BaseModel
 from .managers import UserManager
 from store.models import Category
 

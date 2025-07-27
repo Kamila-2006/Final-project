@@ -25,7 +25,7 @@ class AdPhotoSerializer(serializers.ModelSerializer):
 
 
 class AdCreateSerializer(serializers.ModelSerializer):
-    photos = serializers.ListField(child=serializers.URLField(), write_only=True)
+    photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
 
     class Meta:
         model = Ad
@@ -76,6 +76,7 @@ class AdDetailSerializer(serializers.ModelSerializer):
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
     # views_count = serializers.SerializerMethodField()
+    # products_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad

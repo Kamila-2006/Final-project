@@ -1,6 +1,15 @@
+import uuid
 from django.db import models
 from django.utils.text import slugify
-from .base_models import BaseModel
+
+
+class BaseModel(models.Model):
+    guid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False, db_index=True)
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 class Page(BaseModel):

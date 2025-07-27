@@ -1,6 +1,6 @@
 from rest_framework import generics
 from .models import Page, Region, Setting
-from .serializers import PagesListSerializer, PageDetailSerializer, RegionSerializer, CommonSettingsSerializer
+from .serializers import PageListSerializer, PageDetailSerializer, RegionSerializer, CommonSettingsSerializer
 from .pagination import CommonPagePagination, RegionDistrictPagination
 from .utils.custom_response_decorator import custom_response
 
@@ -8,7 +8,7 @@ from .utils.custom_response_decorator import custom_response
 @custom_response
 class CommonPagesView(generics.ListAPIView):
     queryset = Page.objects.all()
-    serializer_class = PagesListSerializer
+    serializer_class = PageListSerializer
     pagination_class = CommonPagePagination
 
 
