@@ -56,18 +56,14 @@ class CustomTokenVerifyView(TokenVerifyView):
 
 
 @custom_response
-class UserProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data)
-
-
-@custom_response
-class UserEditView(generics.UpdateAPIView):
+class UserProfileView(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+@custom_response
+class UserEditView(UserProfileView):
+    pass
