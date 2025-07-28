@@ -26,6 +26,7 @@ class Ad(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ads')
     published_at = models.DateTimeField(auto_now_add=True)
     is_liked = models.BooleanField(default=False)
+    views_count = models.PositiveIntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
