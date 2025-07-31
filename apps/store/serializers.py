@@ -7,9 +7,28 @@ User = get_user_model()
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    products_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
         fields = ['id', 'name', 'icon', 'products_count']
+
+    def get_products_count(self):
+        return self.ads.count()
+
+
+class ChildCategorySerializer(serializers.Serializer):
+    id = serializers.IntegerField(unique=True)
+    name = serializers.CharField()
+    icon = serializers.ImageField()
+
+
+class CategoryWithChildrenSerializer(serializers.ModelSerializer):
+    children = ChildCategorySerializer(many=True, source='child')
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'icon', 'children']
 
 
 class CategoryShortSerializer(serializers.ModelSerializer):
@@ -24,12 +43,40 @@ class AdPhotoSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 
+class SellerShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'full_name', 'phone_number', 'profile_photo']
+
+
 class AdCreateSerializer(serializers.ModelSerializer):
     photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
+    photo = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    seller = SellerShortSerializer()
 
     class Meta:
         model = Ad
-        fields = ['name_uz', 'name_ru', 'category', 'description_uz', 'description_ru', 'price', 'photos']
+        fields = [
+            'id', 'name', 'name_uz', 'name_ru',
+            'slug', 'category', 'description_uz',
+            'description_ru', 'price', 'photos',
+            'photo', 'published_at', 'address',
+            'seller', 'is_liked', 'updated_time'
+        ]
+        extra_kwargs = {
+            'name_uz': {'write_only': True},
+            'name_ru': {'write_only': True},
+            'category': {'write_only': True},
+            'description_uz': {'write_only': True},
+            'description_ru': {'write_only': True},
+            'photos': {'write_only': True},
+        }
+        read_only_fields = [
+            'id', 'name', 'slug', 'photo',
+            'published_at', 'address', 'seller',
+            'is_liked', 'updated_time'
+        ]
 
     def create(self, validated_data):
         request = self.context['request']
@@ -40,27 +87,6 @@ class AdCreateSerializer(serializers.ModelSerializer):
         AdPhoto.objects.bulk_create([AdPhoto(ad=ad, image=url) for url in photos_data])
         return ad
 
-
-class SellerShortSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'full_name', 'phone_number', 'profile_photo']
-
-
-class AdResponseSerializer(serializers.ModelSerializer):
-    photo = serializers.SerializerMethodField()
-    address = serializers.SerializerMethodField()
-    seller = SellerShortSerializer()
-
-    class Meta:
-        model = Ad
-        fields = [
-            'id', 'name', 'slug', 'price',
-            'photo', 'published_at', 'address',
-            'seller', 'is_liked', 'updated_time'
-        ]
-        read_only_fields = fields
-
     def get_photo(self, obj):
         first_photo = obj.photos.first()
         return first_photo.image if first_photo else None
@@ -69,6 +95,29 @@ class AdResponseSerializer(serializers.ModelSerializer):
         seller_address = obj.seller.address
         return seller_address.name
 
+#
+# class AdResponseSerializer(serializers.ModelSerializer):
+#     photo = serializers.SerializerMethodField()
+#     address = serializers.SerializerMethodField()
+#     seller = SellerShortSerializer()
+#
+#     class Meta:
+#         model = Ad
+#         fields = [
+#             'id', 'name', 'slug', 'price',
+#             'photo', 'published_at', 'address',
+#             'seller', 'is_liked', 'updated_time'
+#         ]
+#         read_only_fields = fields
+#
+#     def get_photo(self, obj):
+#         first_photo = obj.photos.first()
+#         return first_photo.image if first_photo else None
+#
+#     def get_address(self, obj):
+#         seller_address = obj.seller.address
+#         return seller_address.name
+#
 
 class AdDetailSerializer(serializers.ModelSerializer):
     photos = AdPhotoSerializer(many=True, read_only=True)
@@ -76,7 +125,6 @@ class AdDetailSerializer(serializers.ModelSerializer):
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
     # views_count = serializers.SerializerMethodField()
-    # products_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad

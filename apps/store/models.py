@@ -7,6 +7,13 @@ User = get_user_model()
 
 
 class Category(models.Model):
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        related_name="child",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=50)
     icon = models.ImageField(upload_to='category_icons/', null=True, blank=True)
 
