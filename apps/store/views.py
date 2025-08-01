@@ -1,17 +1,27 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework import status
 from common.utils.custom_response_decorator import custom_response
 from .models import Category, Ad
-from .serializers import CategorySerializer, AdCreateSerializer, AdDetailSerializer
+from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer
 from .pagination import CategoryPagination
 
 
 @custom_response
 class CategoriesListView(generics.ListAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = CategoryPagination
+
+    def get_queryset(self):
+        return Category.objects.filter(parent__isnull=True)
+
+
+@custom_response
+class CategoryWithChildrenListView(generics.ListAPIView):
+    serializer_class = CategoryWithChildrenSerializer
+    pagination_class = CategoryPagination
+
+    def get_queryset(self):
+        return Category.objects.filter(parent__isnull=True)
 
 
 @custom_response
