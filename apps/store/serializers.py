@@ -101,7 +101,6 @@ class AdDetailSerializer(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
-    # views_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad
