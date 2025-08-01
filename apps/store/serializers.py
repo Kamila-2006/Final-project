@@ -18,7 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ChildCategorySerializer(serializers.Serializer):
-    id = serializers.IntegerField(unique=True)
+    id = serializers.IntegerField()
     name = serializers.CharField()
     icon = serializers.ImageField()
 

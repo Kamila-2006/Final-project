@@ -5,7 +5,8 @@ from .models import Category, Ad, AdPhoto
 
 @admin.register(Category)
 class CategoryAdmin(TabbedTranslationAdmin):
-    list_display = ['name', 'icon', 'products_count']
+    list_display = ['name', 'icon', 'parent']
+    list_filter = ('parent',)
 
 
 @admin.register(Ad)
