@@ -17,3 +17,7 @@ class CommonPagePagination(CustomLimitOffsetPagination):
 
 class RegionDistrictPagination(CustomLimitOffsetPagination):
     pass
+
+
+class CategoryPagination(CustomLimitOffsetPagination):
+    pass

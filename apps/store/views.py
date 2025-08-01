@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from common.utils.custom_response_decorator import custom_response
 from .models import Category, Ad
 from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer
-from .pagination import CategoryPagination
+from common.pagination import CategoryPagination
 
 
 @custom_response
