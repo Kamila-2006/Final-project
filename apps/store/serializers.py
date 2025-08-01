@@ -95,29 +95,6 @@ class AdCreateSerializer(serializers.ModelSerializer):
         seller_address = obj.seller.address
         return seller_address.name
 
-#
-# class AdResponseSerializer(serializers.ModelSerializer):
-#     photo = serializers.SerializerMethodField()
-#     address = serializers.SerializerMethodField()
-#     seller = SellerShortSerializer()
-#
-#     class Meta:
-#         model = Ad
-#         fields = [
-#             'id', 'name', 'slug', 'price',
-#             'photo', 'published_at', 'address',
-#             'seller', 'is_liked', 'updated_time'
-#         ]
-#         read_only_fields = fields
-#
-#     def get_photo(self, obj):
-#         first_photo = obj.photos.first()
-#         return first_photo.image if first_photo else None
-#
-#     def get_address(self, obj):
-#         seller_address = obj.seller.address
-#         return seller_address.name
-#
 
 class AdDetailSerializer(serializers.ModelSerializer):
     photos = AdPhotoSerializer(many=True, read_only=True)
