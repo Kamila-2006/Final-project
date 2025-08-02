@@ -25,6 +25,18 @@ class CategoryWithChildrenListView(generics.ListAPIView):
 
 
 @custom_response
+class SubCategoryListView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+    pagination_class = CategoryPagination
+
+    def get_queryset(self):
+        parent_id = self.request.query_params.get('parent')
+        if parent_id is not None:
+            return Category.objects.filter(parent_id=parent_id)
+        return Category.objects.none()
+
+
+@custom_response
 class AdCreateView(generics.CreateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
