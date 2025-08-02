@@ -51,8 +51,22 @@ class AdDetailView(generics.RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.views_count += 1
-        instance.save(update_fields=['views_count'])
+        instance.view_count += 1
+        instance.save(update_fields=['view_count'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+@custom_response
+class ProductDownloadView(generics.RetrieveAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdDetailSerializer
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.view_count += 1
+        instance.save(update_fields=['view_count'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

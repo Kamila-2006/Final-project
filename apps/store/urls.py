@@ -9,5 +9,6 @@ urlpatterns = [
     path('categories-with-children/', views.CategoryWithChildrenListView.as_view(), name='categories-with-children'),
     path('sub-category/', views.SubCategoryListView.as_view(), name='sub-category'),
     path('product-image-create/', views.ProductImageCreateView.as_view(), name='product-image-create'),
+    path('product-download/<str:slug>/', views.ProductDownloadView.as_view(), name='product-download'),
 
 ]
