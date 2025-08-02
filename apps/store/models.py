@@ -44,6 +44,8 @@ class Ad(models.Model):
 class AdPhoto(models.Model):
     ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to='ad_photos/')
+    is_main = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Photo for {self.ad.name}"

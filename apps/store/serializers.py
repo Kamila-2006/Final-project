@@ -38,9 +38,12 @@ class CategoryShortSerializer(serializers.ModelSerializer):
 
 
 class AdPhotoSerializer(serializers.ModelSerializer):
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all())
+
     class Meta:
         model = AdPhoto
-        fields = ['image']
+        fields = ['id', 'image', 'is_main', 'product_id', 'created_at']
+        read_only_fields = ['id', 'created_at']
 
 
 class SellerShortSerializer(serializers.ModelSerializer):
@@ -90,6 +93,16 @@ class AdCreateSerializer(serializers.ModelSerializer):
     def get_photo(self, obj):
         first_photo = obj.photos.first()
         return first_photo.image if first_photo else None
+
+    # def get_photo(self, obj):
+    #     first_photo = obj.photos.first()
+    #
+    #     if obj.photos.image.is_main == True:
+    #         return obj.image
+    #     elif first_photo:
+    #         return first_photo
+    #     else:
+    #         return None
 
     def get_address(self, obj):
         seller_address = obj.seller.address

@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from common.utils.custom_response_decorator import custom_response
-from .models import Category, Ad
-from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer
+from .models import Category, Ad, AdPhoto
+from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer, AdPhotoSerializer
 from common.pagination import CategoryPagination
 
 
@@ -55,3 +55,9 @@ class AdDetailView(generics.RetrieveAPIView):
         instance.save(update_fields=['views_count'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+@custom_response
+class ProductImageCreateView(generics.CreateAPIView):
+    queryset = AdPhoto.objects.all()
+    serializer_class = AdPhotoSerializer
