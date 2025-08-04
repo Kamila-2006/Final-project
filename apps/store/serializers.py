@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Category, Ad, AdPhoto
+from .models import Category, Ad, AdPhoto, FavouriteProduct
 
 
 User = get_user_model()
@@ -57,6 +57,7 @@ class AdCreateSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
     address = serializers.SerializerMethodField()
     seller = SellerShortSerializer()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad
@@ -91,22 +92,25 @@ class AdCreateSerializer(serializers.ModelSerializer):
         return ad
 
     def get_photo(self, obj):
-        first_photo = obj.photos.first()
-        return first_photo.image if first_photo else None
+        main_photo = obj.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
 
-    # def get_photo(self, obj):
-    #     first_photo = obj.photos.first()
-    #
-    #     if obj.photos.image.is_main == True:
-    #         return obj.image
-    #     elif first_photo:
-    #         return first_photo
-    #     else:
-    #         return None
+        first_photo = obj.photos.first()
+        if first_photo:
+            return first_photo.image.url
+
+        return None
 
     def get_address(self, obj):
         seller_address = obj.seller.address
         return seller_address.name
+
+    def get_is_liked(self, obj):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return obj.favourites.filter(user=user).exists()
 
 
 class AdDetailSerializer(serializers.ModelSerializer):
@@ -114,6 +118,7 @@ class AdDetailSerializer(serializers.ModelSerializer):
     address = serializers.SerializerMethodField()
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad
@@ -126,3 +131,64 @@ class AdDetailSerializer(serializers.ModelSerializer):
         def get_address(self, obj):
             seller_address = obj.seller.address
             return seller_address.name
+
+        def get_is_liked(self, obj):
+            user = self.context['request'].user
+            if not user.is_authenticated:
+                return False
+            return obj.favourites.filter(user=user).exists()
+
+
+class FavouriteProductSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all())
+
+    class Meta:
+        model = FavouriteProduct
+        fields = ['id', 'product', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        product = validated_data['product']
+
+        obj, created = FavouriteProduct.objects.get_or_create(user=user, product=product)
+        return obj
+
+
+class FavouriteProductListSerializer(serializers.ModelSerializer):
+    address = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
+    photo = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ad
+        fields = [
+            'id', 'name', 'slug', 'description',
+            'price', 'published_at', 'address',
+            'seller', 'photo', 'is_liked', 'updated_time'
+        ]
+
+    def get_address(self, obj):
+        seller_address = obj.seller.address
+        return seller_address.name
+
+    def get_seller(self, obj):
+        return obj.seller.full_name
+
+    def get_photo(self, obj):
+        main_photo = obj.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
+
+        first_photo = obj.photos.first()
+        if first_photo:
+            return first_photo.image.url
+
+        return None
+
+    def get_is_liked(self, obj):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return obj.favourites.filter(user=user).exists()

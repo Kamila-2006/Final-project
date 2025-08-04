@@ -21,3 +21,7 @@ class RegionDistrictPagination(CustomLimitOffsetPagination):
 
 class CategoryPagination(CustomLimitOffsetPagination):
     pass
+
+
+class FavouriteProductPagination(PageNumberPagination):
+    pass

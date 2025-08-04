@@ -28,7 +28,6 @@ class Ad(models.Model):
     price = models.DecimalField(max_digits=14, decimal_places=2)
     seller = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='ads')
     published_at = models.DateTimeField(auto_now_add=True)
-    is_liked = models.BooleanField(default=False)
     view_count = models.PositiveIntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
@@ -49,3 +48,12 @@ class AdPhoto(models.Model):
 
     def __str__(self):
         return f"Photo for {self.ad.name}"
+
+
+class FavouriteProduct(models.Model):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='favourites')
+    product = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='favourites')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')

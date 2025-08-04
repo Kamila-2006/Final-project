@@ -1,9 +1,11 @@
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework import permissions
 from common.utils.custom_response_decorator import custom_response
-from .models import Category, Ad, AdPhoto
-from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer, AdPhotoSerializer
-from common.pagination import CategoryPagination
+from .models import Category, Ad, AdPhoto, FavouriteProduct
+from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer, \
+    AdPhotoSerializer, FavouriteProductSerializer, FavouriteProductListSerializer
+from common.pagination import CategoryPagination, FavouriteProductPagination
 
 
 @custom_response
@@ -75,3 +77,31 @@ class ProductDownloadView(generics.RetrieveAPIView):
 class ProductImageCreateView(generics.CreateAPIView):
     queryset = AdPhoto.objects.all()
     serializer_class = AdPhotoSerializer
+
+
+@custom_response
+class FavouriteProductCreateView(generics.CreateAPIView):
+    queryset = FavouriteProduct.objects.all()
+    serializer_class = FavouriteProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+@custom_response
+class FavouriteProductDeleteView(generics.DestroyAPIView):
+    serializer_class = FavouriteProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return FavouriteProduct.objects.filter(user=self.request.user)
+
+    def get_object(self):
+        product_id = self.kwargs['pk']
+        return self.get_queryset().get(product_id=product_id)
+
+
+@custom_response
+class FavouriteProductListView(generics.ListAPIView):
+    queryset = FavouriteProduct.objects.all()
+    serializer_class = FavouriteProductListSerializer
+    pagination_class = FavouriteProductPagination
+    permission_classes = [permissions.IsAuthenticated]
