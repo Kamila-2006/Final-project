@@ -13,8 +13,8 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'icon', 'products_count']
 
-    def get_products_count(self):
-        return self.ads.count()
+    def get_products_count(self, obj):
+        return obj.ads.count()
 
 
 class ChildCategorySerializer(serializers.Serializer):

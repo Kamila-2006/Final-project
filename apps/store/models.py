@@ -21,6 +21,14 @@ class Category(models.Model):
 
 
 class Ad(models.Model):
+
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('pending', 'Pending'),
+        ('rejected', 'Rejected'),
+    ]
+
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ads')
@@ -28,6 +36,7 @@ class Ad(models.Model):
     price = models.DecimalField(max_digits=14, decimal_places=2)
     seller = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='ads')
     published_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     view_count = models.PositiveIntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
