@@ -108,7 +108,16 @@ class FavouriteProductDeleteView(generics.DestroyAPIView):
 
 @custom_response
 class FavouriteProductListView(generics.ListAPIView):
-    queryset = FavouriteProduct.objects.all()
     serializer_class = FavouriteProductListSerializer
     pagination_class = FavouriteProductPagination
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = FavouriteProduct.objects.filter(user=user)
+
+        category_id = self.request.query_params.get("category")
+        if category_id:
+            queryset = queryset.filter(product__category_id=category_id)
+
+        return queryset
