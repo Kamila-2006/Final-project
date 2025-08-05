@@ -1,12 +1,13 @@
-from modeltranslation.translator import register, TranslationOptions
-from .models import Category, Ad
+from modeltranslation.translator import TranslationOptions, register
+
+from .models import Ad, Category
 
 
 @register(Category)
 class CategoryTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ("name",)
 
 
 @register(Ad)
 class AdTranslationOptions(TranslationOptions):
-    fields = ('name', 'description')
+    fields = ("name", "description")

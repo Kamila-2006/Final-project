@@ -1,11 +1,18 @@
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import permissions
-from common.utils.custom_response_decorator import custom_response
-from .models import Category, Ad, AdPhoto, FavouriteProduct
-from .serializers import CategorySerializer, CategoryWithChildrenSerializer, AdCreateSerializer, AdDetailSerializer, \
-    AdPhotoSerializer, FavouriteProductSerializer, FavouriteProductListSerializer
 from common.pagination import CategoryPagination, FavouriteProductPagination
+from common.utils.custom_response_decorator import custom_response
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+
+from .models import Ad, AdPhoto, Category, FavouriteProduct
+from .serializers import (
+    AdCreateSerializer,
+    AdDetailSerializer,
+    AdPhotoSerializer,
+    CategorySerializer,
+    CategoryWithChildrenSerializer,
+    FavouriteProductListSerializer,
+    FavouriteProductSerializer,
+)
 
 
 @custom_response
@@ -32,7 +39,7 @@ class SubCategoryListView(generics.ListAPIView):
     pagination_class = CategoryPagination
 
     def get_queryset(self):
-        parent_id = self.request.query_params.get('parent')
+        parent_id = self.request.query_params.get("parent")
         if parent_id is not None:
             return Category.objects.filter(parent_id=parent_id)
         return Category.objects.none()
@@ -49,12 +56,12 @@ class AdCreateView(generics.CreateAPIView):
 class AdDetailView(generics.RetrieveAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdDetailSerializer
-    lookup_field = 'slug'
+    lookup_field = "slug"
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.view_count += 1
-        instance.save(update_fields=['view_count'])
+        instance.save(update_fields=["view_count"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -63,12 +70,12 @@ class AdDetailView(generics.RetrieveAPIView):
 class ProductDownloadView(generics.RetrieveAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdDetailSerializer
-    lookup_field = 'slug'
+    lookup_field = "slug"
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.view_count += 1
-        instance.save(update_fields=['view_count'])
+        instance.save(update_fields=["view_count"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -95,7 +102,7 @@ class FavouriteProductDeleteView(generics.DestroyAPIView):
         return FavouriteProduct.objects.filter(user=self.request.user)
 
     def get_object(self):
-        product_id = self.kwargs['pk']
+        product_id = self.kwargs["pk"]
         return self.get_queryset().get(product_id=product_id)
 
 

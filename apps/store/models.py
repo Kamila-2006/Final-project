@@ -11,10 +11,10 @@ class Category(models.Model):
         blank=True,
     )
     name = models.CharField(max_length=50)
-    icon = models.ImageField(upload_to='category_icons/', null=True, blank=True)
+    icon = models.ImageField(upload_to="category_icons/", null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = 'Categories'
+        verbose_name_plural = "Categories"
 
     def __str__(self):
         return self.name
@@ -23,20 +23,20 @@ class Category(models.Model):
 class Ad(models.Model):
 
     STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('pending', 'Pending'),
-        ('rejected', 'Rejected'),
+        ("active", "Active"),
+        ("inactive", "Inactive"),
+        ("pending", "Pending"),
+        ("rejected", "Rejected"),
     ]
 
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='ads')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="ads")
     description = models.TextField()
     price = models.DecimalField(max_digits=14, decimal_places=2)
-    seller = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='ads')
+    seller = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="ads")
     published_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active")
     view_count = models.PositiveIntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
@@ -50,8 +50,8 @@ class Ad(models.Model):
 
 
 class AdPhoto(models.Model):
-    ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='photos')
-    image = models.ImageField(upload_to='ad_photos/')
+    ad = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to="ad_photos/")
     is_main = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -60,9 +60,9 @@ class AdPhoto(models.Model):
 
 
 class FavouriteProduct(models.Model):
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='favourites')
-    product = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='favourites')
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="favourites")
+    product = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="favourites")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'product')
+        unique_together = ("user", "product")

@@ -17,15 +17,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="category",
             name="icon",
-            field=models.ImageField(
-                blank=True, null=True, upload_to="category_icons/"
-            ),
+            field=models.ImageField(blank=True, null=True, upload_to="category_icons/"),
         ),
         migrations.AlterField(
             model_name="category",
             name="products_count",
-            field=models.DecimalField(
-                decimal_places=3, default=0, max_digits=10
-            ),
+            field=models.DecimalField(decimal_places=3, default=0, max_digits=10),
         ),
     ]

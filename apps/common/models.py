@@ -1,4 +1,5 @@
 import uuid
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -34,7 +35,7 @@ class Region(BaseModel):
 
 
 class District(BaseModel):
-    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='districts')
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name="districts")
     name = models.CharField(max_length=100)
 
     def __str__(self):

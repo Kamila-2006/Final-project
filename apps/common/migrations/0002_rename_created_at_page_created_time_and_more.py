@@ -24,9 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="page",
             name="guid",
-            field=models.UUIDField(
-                db_index=True, default=uuid.uuid4, editable=False, unique=True
-            ),
+            field=models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True),
         ),
         migrations.AddField(
             model_name="setting",

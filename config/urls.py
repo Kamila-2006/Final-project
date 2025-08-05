@@ -15,9 +15,7 @@ from config.settings import (
 class BothHttpAndHttpsSchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        schema.schemes = (
-            ["http"] if django_settings_module == "development" else ["https"]
-        )
+        schema.schemes = ["http"] if django_settings_module == "development" else ["https"]
         return schema
 
 
@@ -40,21 +38,17 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path("api/v1/common/", include("common.urls"), name='common'),
-    path("api/v1/accounts/", include("accounts.urls"), name='accounts'),
-    path("api/v1/store/", include("store.urls"), name='store'),
+    path("api/v1/common/", include("common.urls"), name="common"),
+    path("api/v1/accounts/", include("accounts.urls"), name="accounts"),
+    path("api/v1/store/", include("store.urls"), name="store"),
 ]
 
 if django_settings_module == "development":
     urlpatterns += [
         path("__debug__/", include("debug_toolbar.urls")),
     ]
-    urlpatterns += static(
-        settings.STATIC_URL, document_root=settings.STATIC_ROOT
-    )
-    urlpatterns += static(
-        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
-    )
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += [
         path(
             "swagger/",

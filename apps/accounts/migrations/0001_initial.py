@@ -32,9 +32,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
                 ),
                 (
                     "is_superuser",
@@ -48,9 +46,7 @@ class Migration(migrations.Migration):
                 ("phone_number", models.CharField(max_length=13)),
                 (
                     "profile_photo",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="profile-photos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="profile-photos/"),
                 ),
                 (
                     "role",

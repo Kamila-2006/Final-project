@@ -1,15 +1,18 @@
-from rest_framework import generics, status
+from common.utils.custom_response_decorator import custom_response
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenVerifyView
-from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-from common.utils.custom_response_decorator import custom_response
-from .serializers import SellerRegistrationSerializer, SellerRegistrationResponseSerializer, \
-    CustomTokenObtainPairSerializer, UserProfileSerializer
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    SellerRegistrationResponseSerializer,
+    SellerRegistrationSerializer,
+    UserProfileSerializer,
+)
 
 User = get_user_model()
 
@@ -40,18 +43,15 @@ class CustomTokenVerifyView(TokenVerifyView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            token = UntypedToken(request.data['token'])
-            user_id = token.payload.get('user_guid')
+            token = UntypedToken(request.data["token"])
+            user_id = token.payload.get("user_guid")
 
-            return Response({
-                "valid": True,
-                "user_id": user_id
-            }, status=status.HTTP_200_OK)
+            return Response({"valid": True, "user_id": user_id}, status=status.HTTP_200_OK)
         except ValidationError:
-            return Response({
-                "valid": False,
-                "user_id": None
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"valid": False, "user_id": None},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
 
 @custom_response

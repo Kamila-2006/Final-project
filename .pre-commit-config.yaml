@@ -7,7 +7,7 @@ exclude: >
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.8
+    rev: v0.4.4
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -17,15 +17,13 @@ repos:
     hooks:
       - id: black
         language_version: python3.12
-        additional_dependencies: []
         args: [--fast]
 
   - repo: local
     hooks:
       - id: migrations-check
         name: Check for uncreated migrations
-        entry: >
-          bash -c 'if find apps -type f -name models.py | grep .; then backend/manage.py makemigrations --check --dry-run; else echo "No models.py found, skipping migration check."; fi'
+        entry: python manage.py makemigrations --check --dry-run
         language: system
         pass_filenames: false
         stages: [pre-commit]

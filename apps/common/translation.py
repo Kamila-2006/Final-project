@@ -1,22 +1,23 @@
-from modeltranslation.translator import register, TranslationOptions
-from .models import Region, District, Setting, Page
+from modeltranslation.translator import TranslationOptions, register
+
+from .models import District, Page, Region, Setting
 
 
 @register(Region)
 class RegionTranslationOptions(TranslationOptions):
-    fields = ('name',)
+    fields = ("name",)
 
 
 @register(District)
-class RegionTranslationOptions(TranslationOptions):
-    fields = ('name',)
+class DistrictTranslationOptions(TranslationOptions):
+    fields = ("name",)
 
 
 @register(Setting)
 class SettingTranslationOptions(TranslationOptions):
-    fields = ('working_hours',)
+    fields = ("working_hours",)
 
 
 @register(Page)
 class PageTranslationOptions(TranslationOptions):
-    fields = ('title', 'content')
+    fields = ("title", "content")

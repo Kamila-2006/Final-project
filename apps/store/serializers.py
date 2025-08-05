@@ -1,7 +1,7 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Category, Ad, AdPhoto, FavouriteProduct
+from rest_framework import serializers
 
+from .models import Ad, AdPhoto, Category, FavouriteProduct
 
 User = get_user_model()
 
@@ -11,7 +11,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'icon', 'products_count']
+        fields = ["id", "name", "icon", "products_count"]
 
     def get_products_count(self, obj):
         return obj.ads.count()
@@ -24,17 +24,17 @@ class ChildCategorySerializer(serializers.Serializer):
 
 
 class CategoryWithChildrenSerializer(serializers.ModelSerializer):
-    children = ChildCategorySerializer(many=True, source='child')
+    children = ChildCategorySerializer(many=True, source="child")
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'icon', 'children']
+        fields = ["id", "name", "icon", "children"]
 
 
 class CategoryShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class AdPhotoSerializer(serializers.ModelSerializer):
@@ -42,14 +42,14 @@ class AdPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdPhoto
-        fields = ['id', 'image', 'is_main', 'product_id', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ["id", "image", "is_main", "product_id", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
 
 class SellerShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'full_name', 'phone_number', 'profile_photo']
+        fields = ["id", "full_name", "phone_number", "profile_photo"]
 
 
 class AdCreateSerializer(serializers.ModelSerializer):
@@ -62,31 +62,48 @@ class AdCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ad
         fields = [
-            'id', 'name', 'name_uz', 'name_ru',
-            'slug', 'category', 'description_uz',
-            'description_ru', 'price', 'photos',
-            'photo', 'published_at', 'address',
-            'seller', 'is_liked', 'updated_time'
+            "id",
+            "name",
+            "name_uz",
+            "name_ru",
+            "slug",
+            "category",
+            "description_uz",
+            "description_ru",
+            "price",
+            "photos",
+            "photo",
+            "published_at",
+            "address",
+            "seller",
+            "is_liked",
+            "updated_time",
         ]
         extra_kwargs = {
-            'name_uz': {'write_only': True},
-            'name_ru': {'write_only': True},
-            'category': {'write_only': True},
-            'description_uz': {'write_only': True},
-            'description_ru': {'write_only': True},
-            'photos': {'write_only': True},
+            "name_uz": {"write_only": True},
+            "name_ru": {"write_only": True},
+            "category": {"write_only": True},
+            "description_uz": {"write_only": True},
+            "description_ru": {"write_only": True},
+            "photos": {"write_only": True},
         }
         read_only_fields = [
-            'id', 'name', 'slug', 'photo',
-            'published_at', 'address', 'seller',
-            'is_liked', 'updated_time'
+            "id",
+            "name",
+            "slug",
+            "photo",
+            "published_at",
+            "address",
+            "seller",
+            "is_liked",
+            "updated_time",
         ]
 
     def create(self, validated_data):
-        request = self.context['request']
+        request = self.context["request"]
         user = request.user
 
-        photos_data = validated_data.pop('photos')
+        photos_data = validated_data.pop("photos")
         ad = Ad.objects.create(seller=user, **validated_data)
         AdPhoto.objects.bulk_create([AdPhoto(ad=ad, image=url) for url in photos_data])
         return ad
@@ -107,7 +124,7 @@ class AdCreateSerializer(serializers.ModelSerializer):
         return seller_address.name
 
     def get_is_liked(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not user.is_authenticated:
             return False
         return obj.favourites.filter(user=user).exists()
@@ -122,18 +139,28 @@ class AdDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ad
-        fields = ['id', 'name', 'slug', 'description',
-                  'price', 'photos', 'published_at',
-                  'address', 'seller', 'category',
-                  'is_liked', 'view_count', 'updated_time'
-                  ]
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "description",
+            "price",
+            "photos",
+            "published_at",
+            "address",
+            "seller",
+            "category",
+            "is_liked",
+            "view_count",
+            "updated_time",
+        ]
 
         def get_address(self, obj):
             seller_address = obj.seller.address
             return seller_address.name
 
         def get_is_liked(self, obj):
-            user = self.context['request'].user
+            user = self.context["request"].user
             if not user.is_authenticated:
                 return False
             return obj.favourites.filter(user=user).exists()
@@ -144,12 +171,12 @@ class FavouriteProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FavouriteProduct
-        fields = ['id', 'product', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ["id", "product", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        product = validated_data['product']
+        user = self.context["request"].user
+        product = validated_data["product"]
 
         obj, created = FavouriteProduct.objects.get_or_create(user=user, product=product)
         return obj
@@ -164,9 +191,17 @@ class FavouriteProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ad
         fields = [
-            'id', 'name', 'slug', 'description',
-            'price', 'published_at', 'address',
-            'seller', 'photo', 'is_liked', 'updated_time'
+            "id",
+            "name",
+            "slug",
+            "description",
+            "price",
+            "published_at",
+            "address",
+            "seller",
+            "photo",
+            "is_liked",
+            "updated_time",
         ]
 
     def get_address(self, obj):
@@ -188,7 +223,7 @@ class FavouriteProductListSerializer(serializers.ModelSerializer):
         return None
 
     def get_is_liked(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not user.is_authenticated:
             return False
         return obj.favourites.filter(user=user).exists()
