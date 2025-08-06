@@ -1,17 +1,16 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Ad, AdPhoto, Category, FavouriteProduct
+from .models import Ad, AdPhoto, FavouriteProduct
 
 User = get_user_model()
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    icon = serializers.ImageField()
     products_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Category
-        fields = ["id", "name", "icon", "products_count"]
 
     def get_products_count(self, obj):
         return obj.ads.count()
@@ -23,18 +22,16 @@ class ChildCategorySerializer(serializers.Serializer):
     icon = serializers.ImageField()
 
 
-class CategoryWithChildrenSerializer(serializers.ModelSerializer):
+class CategoryWithChildrenSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    icon = serializers.IntegerField()
     children = ChildCategorySerializer(many=True, source="child")
 
-    class Meta:
-        model = Category
-        fields = ["id", "name", "icon", "children"]
 
-
-class CategoryShortSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ["id", "name"]
+class CategoryShortSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
 
 
 class AdPhotoSerializer(serializers.ModelSerializer):
@@ -46,16 +43,17 @@ class AdPhotoSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at"]
 
 
-class SellerShortSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "full_name", "phone_number", "profile_photo"]
+class SellerShortSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    full_name = serializers.CharField()
+    phone_number = serializers.CharField()
+    profile_photo = serializers.ImageField()
 
 
 class AdCreateSerializer(serializers.ModelSerializer):
     photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
     photo = serializers.SerializerMethodField()
-    address = serializers.SerializerMethodField()
+    address = serializers.CharField(source="seller.address.name")
     seller = SellerShortSerializer()
     is_liked = serializers.SerializerMethodField()
 
@@ -119,10 +117,6 @@ class AdCreateSerializer(serializers.ModelSerializer):
 
         return None
 
-    def get_address(self, obj):
-        seller_address = obj.seller.address
-        return seller_address.name
-
     def get_is_liked(self, obj):
         user = self.context["request"].user
         if not user.is_authenticated:
@@ -130,40 +124,26 @@ class AdCreateSerializer(serializers.ModelSerializer):
         return obj.favourites.filter(user=user).exists()
 
 
-class AdDetailSerializer(serializers.ModelSerializer):
+class AdDetailSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    description = serializers.CharField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
     photos = AdPhotoSerializer(many=True, read_only=True)
-    address = serializers.SerializerMethodField()
+    published_at = serializers.DateTimeField()
+    address = serializers.CharField(source="seller.address.name")
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
     is_liked = serializers.SerializerMethodField()
+    view_count = serializers.IntegerField()
+    updated_time = serializers.DateTimeField()
 
-    class Meta:
-        model = Ad
-        fields = [
-            "id",
-            "name",
-            "slug",
-            "description",
-            "price",
-            "photos",
-            "published_at",
-            "address",
-            "seller",
-            "category",
-            "is_liked",
-            "view_count",
-            "updated_time",
-        ]
-
-        def get_address(self, obj):
-            seller_address = obj.seller.address
-            return seller_address.name
-
-        def get_is_liked(self, obj):
-            user = self.context["request"].user
-            if not user.is_authenticated:
-                return False
-            return obj.favourites.filter(user=user).exists()
+    def get_is_liked(self, obj):
+        user = self.context["request"].user
+        if not user.is_authenticated:
+            return False
+        return obj.favourites.filter(user=user).exists()
 
 
 class FavouriteProductSerializer(serializers.ModelSerializer):
@@ -182,34 +162,18 @@ class FavouriteProductSerializer(serializers.ModelSerializer):
         return obj
 
 
-class FavouriteProductListSerializer(serializers.ModelSerializer):
-    address = serializers.SerializerMethodField()
-    seller = serializers.SerializerMethodField()
+class FavouriteProductListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    description = serializers.CharField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
+    published_at = serializers.DateTimeField()
+    address = serializers.CharField(source="seller.address.name")
+    seller = serializers.CharField(source="seller.full_name")
     photo = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Ad
-        fields = [
-            "id",
-            "name",
-            "slug",
-            "description",
-            "price",
-            "published_at",
-            "address",
-            "seller",
-            "photo",
-            "is_liked",
-            "updated_time",
-        ]
-
-    def get_address(self, obj):
-        seller_address = obj.seller.address
-        return seller_address.name
-
-    def get_seller(self, obj):
-        return obj.seller.full_name
+    updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
         main_photo = obj.photos.filter(is_main=True).first()
@@ -229,25 +193,18 @@ class FavouriteProductListSerializer(serializers.ModelSerializer):
         return obj.favourites.filter(user=user).exists()
 
 
-class MyAdsListSerializer(serializers.ModelSerializer):
+class MyAdsListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
     photo = serializers.SerializerMethodField()
-    address = serializers.SerializerMethodField()
+    published_at = serializers.DateTimeField()
+    address = serializers.CharField(source="seller.address.name")
+    status = serializers.CharField()
+    view_count = serializers.IntegerField()
     is_liked = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = [
-            "id",
-            "name",
-            "slug",
-            "price",
-            "photo",
-            "published_at",
-            "address",
-            "status",
-            "view_count",
-            "is_liked",
-            "updated_time",
-        ]
+    updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
         main_photo = obj.photos.filter(is_main=True).first()
@@ -259,10 +216,6 @@ class MyAdsListSerializer(serializers.ModelSerializer):
             return first_photo.image.url
 
         return None
-
-    def get_address(self, obj):
-        seller_address = obj.seller.address
-        return seller_address.name
 
     def get_is_liked(self, obj):
         user = self.context["request"].user
