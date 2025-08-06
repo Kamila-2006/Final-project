@@ -60,7 +60,9 @@ class AdPhoto(models.Model):
 
 
 class FavouriteProduct(models.Model):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="favourites")
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="favourites", blank=True, null=True
+    )
     product = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="favourites")
     created_at = models.DateTimeField(auto_now_add=True)
 
