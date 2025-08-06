@@ -227,3 +227,45 @@ class FavouriteProductListSerializer(serializers.ModelSerializer):
         if not user.is_authenticated:
             return False
         return obj.favourites.filter(user=user).exists()
+
+
+class MyAdsListSerializer(serializers.ModelSerializer):
+    photo = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "price",
+            "photo",
+            "published_at",
+            "address",
+            "status",
+            "view_count",
+            "is_liked",
+            "updated_time",
+        ]
+
+    def get_photo(self, obj):
+        main_photo = obj.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
+
+        first_photo = obj.photos.first()
+        if first_photo:
+            return first_photo.image.url
+
+        return None
+
+    def get_address(self, obj):
+        seller_address = obj.seller.address
+        return seller_address.name
+
+    def get_is_liked(self, obj):
+        user = self.context["request"].user
+        if not user.is_authenticated:
+            return False
+        return obj.favourites.filter(user=user).exists()

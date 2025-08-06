@@ -12,6 +12,7 @@ from .serializers import (
     CategoryWithChildrenSerializer,
     FavouriteProductListSerializer,
     FavouriteProductSerializer,
+    MyAdsListSerializer,
 )
 
 
@@ -114,10 +115,26 @@ class FavouriteProductListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = FavouriteProduct.objects.filter(user=user)
+        queryset = Ad.objects.filter(favourites__user=user)
 
         category_id = self.request.query_params.get("category")
         if category_id:
-            queryset = queryset.filter(product__category_id=category_id)
+            queryset = queryset.filter(category_id=category_id)
+
+        return queryset
+
+
+@custom_response
+class MyAdsListView(generics.ListAPIView):
+    serializer_class = MyAdsListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Ad.objects.filter(seller=user).order_by("-published_at")
+
+        status = self.request.query_params.get("status")
+        if status in ["active", "inactive", "pending", "rejected"]:
+            queryset = queryset.filter(status=status)
 
         return queryset
