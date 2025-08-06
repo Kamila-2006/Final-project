@@ -1,4 +1,4 @@
-from common.pagination import CategoryPagination, FavouriteProductPagination
+from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
 from common.utils.custom_response_decorator import custom_response
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -128,6 +128,7 @@ class FavouriteProductListView(generics.ListAPIView):
 class MyAdsListView(generics.ListAPIView):
     serializer_class = MyAdsListSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = MyAdsListPagination
 
     def get_queryset(self):
         user = self.request.user

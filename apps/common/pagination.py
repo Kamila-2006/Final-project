@@ -27,3 +27,7 @@ class CategoryPagination(CustomLimitOffsetPagination):
 
 class FavouriteProductPagination(PageNumberPagination):
     pass
+
+
+class MyAdsListPagination(PageNumberPagination):
+    pass
