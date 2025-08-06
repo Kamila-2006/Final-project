@@ -9,7 +9,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 
 from .serializers import (
     CustomTokenObtainPairSerializer,
-    SellerRegistrationResponseSerializer,
     SellerRegistrationSerializer,
     UserProfileSerializer,
 )
@@ -25,10 +24,8 @@ class SellerRegistrationView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
 
-        response_serializer = SellerRegistrationResponseSerializer(user)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @custom_response

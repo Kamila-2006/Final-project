@@ -16,18 +16,35 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class SellerRegistrationSerializer(serializers.ModelSerializer):
-    address = AddressSerializer()
+    address = AddressSerializer(write_only=True)
     category = PrimaryKeyRelatedField(queryset=Category.objects.all())
+    category_id = serializers.IntegerField(source="category.id")
 
     class Meta:
         model = User
         fields = (
+            "id",
             "full_name",
             "project_name",
             "category",
+            "category_id",
             "phone_number",
             "address",
+            "status",
         )
+        read_only_fields = (
+            "id",
+            "category_id",
+            "status",
+        )
+        extra_kwargs = {
+            "category": {"write_only": True},
+        }
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep["address"] = instance.address.name if instance.address else None
+        return rep
 
     def validate_phone_number(self, value):
         if User.objects.filter(phone_number=value).exists():
@@ -39,23 +56,6 @@ class SellerRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         Address.objects.create(user=user, **address_data)
         return user
-
-
-class SellerRegistrationResponseSerializer(serializers.ModelSerializer):
-    category_id = serializers.IntegerField(source="category.id")
-    address = serializers.CharField(source="address.name")
-
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "full_name",
-            "project_name",
-            "category_id",
-            "phone_number",
-            "address",
-            "status",
-        ]
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -83,6 +83,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return response_data
 
     def to_internal_value(self, data):
+        data = data.copy()
         if "phone_number" in data:
             data["username"] = data["phone_number"]
         return super().to_internal_value(data)
