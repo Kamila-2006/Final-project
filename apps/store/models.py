@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -61,10 +62,29 @@ class AdPhoto(models.Model):
 
 class FavouriteProduct(models.Model):
     user = models.ForeignKey(
-        "accounts.User", on_delete=models.CASCADE, related_name="favourites", blank=True, null=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favourites",
+        null=True,
+        blank=True,
     )
-    product = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name="favourites")
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    product = models.ForeignKey("store.Ad", on_delete=models.CASCADE, related_name="favourites")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "product")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "product"],
+                name="unique_user_product",
+                condition=models.Q(user__isnull=False),
+            ),
+            models.UniqueConstraint(
+                fields=["device_id", "product"],
+                name="unique_device_product",
+                condition=models.Q(device_id__isnull=False),
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user or self.device_id} - {self.product}"

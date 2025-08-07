@@ -1,6 +1,6 @@
 from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
 from common.utils.custom_response_decorator import custom_response
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
 from .models import Ad, AdPhoto, Category, FavouriteProduct
@@ -92,6 +92,21 @@ class FavouriteProductCreateView(generics.CreateAPIView):
     queryset = FavouriteProduct.objects.all()
     serializer_class = FavouriteProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+@custom_response
+class FavouriteProductCreateByIDView(generics.CreateAPIView):
+    queryset = FavouriteProduct.objects.all()
+    serializer_class = FavouriteProductSerializer
+
+    def perform_create(self, serializer):
+        device_id = self.request.data.get("device_id")
+        if not device_id:
+            raise serializers.ValidationError({"device_id": "Это поле обязательно."})
+        serializer.save(device_id=device_id)
 
 
 @custom_response

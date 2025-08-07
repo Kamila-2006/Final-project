@@ -148,17 +148,34 @@ class AdDetailSerializer(serializers.Serializer):
 
 class FavouriteProductSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all())
+    device_id = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = FavouriteProduct
-        fields = ["id", "product", "created_at"]
+        fields = ["id", "product", "created_at", "device_id"]
         read_only_fields = ["id", "created_at"]
 
-    def create(self, validated_data):
+    def validate(self, attrs):
         user = self.context["request"].user
+        device_id = attrs.get("device_id")
+
+        if not user.is_authenticated and not device_id:
+            raise serializers.ValidationError("Anonymous users must provide a device_id.")
+
+        return attrs
+
+    def create(self, validated_data):
+        user = (
+            self.context["request"].user if self.context["request"].user.is_authenticated else None
+        )
+        device_id = validated_data.get("device_id")
         product = validated_data["product"]
 
-        obj, created = FavouriteProduct.objects.get_or_create(user=user, product=product)
+        if user:
+            obj, _ = FavouriteProduct.objects.get_or_create(user=user, product=product)
+        else:
+            obj, _ = FavouriteProduct.objects.get_or_create(device_id=device_id, product=product)
+
         return obj
 
 

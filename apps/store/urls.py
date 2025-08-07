@@ -32,14 +32,19 @@ urlpatterns = [
         name="favourite-product-create",
     ),
     path(
-        "favourite-product/<int:pk>/delete/",
-        views.FavouriteProductDeleteView.as_view(),
-        name="favourite-product-delete",
+        "favourite-product-create-by-id/",
+        views.FavouriteProductCreateByIDView.as_view(),
+        name="favourite-product-create-by-id",
     ),
     path(
         "my-favourite-product/",
         views.FavouriteProductListView.as_view(),
         name="my-favourite-products",
+    ),
+    path(
+        "favourite-product/<int:pk>/delete/",
+        views.FavouriteProductDeleteView.as_view(),
+        name="favourite-product-delete",
     ),
     path("my-ads/", views.MyAdsListView.as_view(), name="my-ads-list"),
 ]
