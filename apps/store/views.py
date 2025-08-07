@@ -1,7 +1,6 @@
 from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
 from common.utils.custom_response_decorator import custom_response
 from rest_framework import generics, permissions, serializers
-from rest_framework.response import Response
 
 from .models import Ad, AdPhoto, Category, FavouriteProduct
 from .serializers import (
@@ -12,6 +11,7 @@ from .serializers import (
     CategoryWithChildrenSerializer,
     FavouriteProductListSerializer,
     FavouriteProductSerializer,
+    MyAdSerializer,
     MyAdsListSerializer,
 )
 
@@ -59,12 +59,12 @@ class AdDetailView(generics.RetrieveAPIView):
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.view_count += 1
-        instance.save(update_fields=["view_count"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     instance.view_count += 1
+    #     instance.save(update_fields=["view_count"])
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
 
 @custom_response
@@ -73,12 +73,12 @@ class ProductDownloadView(generics.RetrieveAPIView):
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.view_count += 1
-        instance.save(update_fields=["view_count"])
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     instance.view_count += 1
+    #     instance.save(update_fields=["view_count"])
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
 
 @custom_response
@@ -194,3 +194,19 @@ class MyAdsListView(generics.ListAPIView):
             queryset = queryset.filter(status=status)
 
         return queryset
+
+
+@custom_response
+class MyAdDetailView(generics.RetrieveAPIView):
+    serializer_class = MyAdSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Ad.objects.filter(seller=self.request.user)
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     instance.view_count += 1
+    #     instance.save(update_fields=["view_count"])
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)

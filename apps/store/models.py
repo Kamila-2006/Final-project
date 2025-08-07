@@ -56,6 +56,13 @@ class AdPhoto(models.Model):
     is_main = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.is_main:
+            AdPhoto.objects.filter(ad=self.ad, is_main=True).exclude(id=self.id).update(
+                is_main=False
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Photo for {self.ad.name}"
 

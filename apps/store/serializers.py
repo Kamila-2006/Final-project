@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Ad, AdPhoto, FavouriteProduct
+from .models import Ad, AdPhoto, Category, FavouriteProduct
 
 User = get_user_model()
 
@@ -107,7 +107,7 @@ class AdCreateSerializer(serializers.ModelSerializer):
         return ad
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
+        main_photo = obj.photos.filter(is_main=True)
         if main_photo:
             return main_photo.image.url
 
@@ -193,7 +193,7 @@ class FavouriteProductListSerializer(serializers.Serializer):
     updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
+        main_photo = obj.photos.filter(is_main=True)
         if main_photo:
             return main_photo.image.url
 
@@ -229,7 +229,7 @@ class MyAdsListSerializer(serializers.Serializer):
     updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
+        main_photo = obj.photos.filter(is_main=True)
         if main_photo:
             return main_photo.image.url
 
@@ -244,3 +244,24 @@ class MyAdsListSerializer(serializers.Serializer):
         if not user.is_authenticated:
             return False
         return obj.favourites.filter(user=user).exists()
+
+
+class MyAdSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.filter(parent=None))
+    photos = AdPhotoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Ad
+        fields = [
+            "id",
+            "name",
+            "slug",
+            "description",
+            "category",
+            "price",
+            "photos",
+            "published_at",
+            "status",
+            "view_count",
+            "updated_time",
+        ]
