@@ -123,6 +123,23 @@ class FavouriteProductDeleteView(generics.DestroyAPIView):
 
 
 @custom_response
+class FavouriteProductDeleteByIDView(generics.DestroyAPIView):
+    serializer_class = FavouriteProductSerializer
+
+    def get_queryset(self):
+        device_id = self.request.query_params.get("device_id")
+        if not device_id:
+            raise serializers.ValidationError(
+                {"device_id": "Это поле обязательно в query-параметрах."}
+            )
+        return FavouriteProduct.objects.filter(device_id=device_id)
+
+    def get_object(self):
+        product_id = self.kwargs["pk"]
+        return self.get_queryset().get(product_id=product_id)
+
+
+@custom_response
 class FavouriteProductListView(generics.ListAPIView):
     serializer_class = FavouriteProductListSerializer
     pagination_class = FavouriteProductPagination
