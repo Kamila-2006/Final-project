@@ -42,6 +42,11 @@ urlpatterns = [
         name="my-favourite-products",
     ),
     path(
+        "my-favourite-product-by-id/",
+        views.FavouriteProductByIDListView.as_view(),
+        name="my-favourite-products-by-id",
+    ),
+    path(
         "favourite-product/<int:pk>/delete/",
         views.FavouriteProductDeleteView.as_view(),
         name="favourite-product-delete",

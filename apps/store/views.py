@@ -140,6 +140,29 @@ class FavouriteProductListView(generics.ListAPIView):
 
 
 @custom_response
+class FavouriteProductByIDListView(generics.ListAPIView):
+    serializer_class = FavouriteProductListSerializer
+    pagination_class = FavouriteProductPagination
+
+    def get_queryset(self):
+        device_id = self.request.query_params.get("device_id")
+
+        if not device_id:
+            raise serializers.ValidationError(
+                {"device_id": "Это поле обязательно в query-параметрах."}
+            )
+
+        queryset = Ad.objects.filter(favourites__device_id=device_id)
+
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["device_id"] = self.request.query_params.get("device_id")
+        return context
+
+
+@custom_response
 class MyAdsListView(generics.ListAPIView):
     serializer_class = MyAdsListSerializer
     permission_classes = [permissions.IsAuthenticated]

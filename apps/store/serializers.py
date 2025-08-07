@@ -205,9 +205,14 @@ class FavouriteProductListSerializer(serializers.Serializer):
 
     def get_is_liked(self, obj):
         user = self.context["request"].user
-        if not user.is_authenticated:
-            return False
-        return obj.favourites.filter(user=user).exists()
+        if user.is_authenticated:
+            return obj.favourites.filter(user=user).exists()
+
+        device_id = self.context.get("device_id")
+        if device_id:
+            return obj.favourites.filter(device_id=device_id).exists()
+
+        return False
 
 
 class MyAdsListSerializer(serializers.Serializer):
