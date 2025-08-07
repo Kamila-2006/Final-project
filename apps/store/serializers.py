@@ -249,6 +249,9 @@ class MyAdsListSerializer(serializers.Serializer):
 class MyAdSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.filter(parent=None))
     photos = AdPhotoSerializer(many=True, read_only=True)
+    new_photos = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
 
     class Meta:
         model = Ad
@@ -260,8 +263,25 @@ class MyAdSerializer(serializers.ModelSerializer):
             "category",
             "price",
             "photos",
+            "new_photos",
             "published_at",
             "status",
             "view_count",
             "updated_time",
         ]
+        read_only_fields = ["id", "slug", "published_at", "status", "view_count", "updated_time"]
+
+    def update(self, instance, validated_data):
+        new_photos = validated_data.pop("new_photos", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if new_photos:
+            instance.photos.all().delete()
+
+            for photo_file in new_photos:
+                AdPhoto.objects.create(ad=instance, image=photo_file)
+
+        return instance

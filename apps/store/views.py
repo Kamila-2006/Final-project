@@ -197,7 +197,7 @@ class MyAdsListView(generics.ListAPIView):
 
 
 @custom_response
-class MyAdDetailView(generics.RetrieveAPIView):
+class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MyAdSerializer
     permission_classes = [permissions.IsAuthenticated]
 
