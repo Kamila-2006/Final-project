@@ -14,5 +14,5 @@ urlpatterns = [
         views.RegionsDistrictsView.as_view(),
         name="regions_with_districts",
     ),
-    path("settings/", views.CommonSettingsView.as_view(), name="common-settings"),
+    path("setting/", views.CommonSettingsView.as_view(), name="common-settings"),
 ]
