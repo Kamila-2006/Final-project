@@ -148,12 +148,14 @@ class AdDetailSerializer(serializers.Serializer):
 
 class FavouriteProductSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all())
-    device_id = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = FavouriteProduct
         fields = ["id", "product", "created_at", "device_id"]
         read_only_fields = ["id", "created_at"]
+        extra_kwargs = {
+            "device_id": {"required": False},
+        }
 
     def validate(self, attrs):
         user = self.context["request"].user

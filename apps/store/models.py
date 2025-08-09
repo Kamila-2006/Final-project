@@ -22,7 +22,6 @@ class Category(models.Model):
 
 
 class Ad(models.Model):
-
     STATUS_CHOICES = [
         ("active", "Active"),
         ("inactive", "Inactive"),
