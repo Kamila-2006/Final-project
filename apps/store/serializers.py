@@ -25,7 +25,7 @@ class ChildCategorySerializer(serializers.Serializer):
 class CategoryWithChildrenSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
-    icon = serializers.IntegerField()
+    icon = serializers.ImageField()
     children = ChildCategorySerializer(many=True, source="child")
 
 
@@ -53,8 +53,8 @@ class SellerShortSerializer(serializers.Serializer):
 class AdCreateSerializer(serializers.ModelSerializer):
     photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
     photo = serializers.SerializerMethodField()
-    address = serializers.CharField(source="seller.address.name")
-    seller = SellerShortSerializer()
+    address = serializers.CharField(source="seller.address.name", read_only=True)
+    seller = SellerShortSerializer(read_only=True)
     is_liked = serializers.SerializerMethodField()
 
     class Meta:
