@@ -66,6 +66,8 @@ python manage.py runserver
 
 ```
 
+---
+
 ## 📬 Aloqa
 - Muallif: Kamila Abdurahmanova
 - GitHub: https://github.com/Kamila-2006

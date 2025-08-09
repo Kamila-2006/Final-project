@@ -64,6 +64,9 @@ python manage.py migrate
 python manage.py runserver
 
 ```
+
+---
+
 ## 📬 Контакты
 - Автор: Камила Абдурахманова  
 - GitHub: https://github.com/Kamila-2006
