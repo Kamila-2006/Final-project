@@ -3,9 +3,9 @@
 </h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-blue" alt="Python">
-  <img src="https://img.shields.io/badge/Django-5.0-blue" alt="Django">
-  <img src="https://img.shields.io/badge/DRF-3.15-blue" alt="DRF">
+  <img src="https://img.shields.io/badge/Python-3.12-blue" alt="Python">
+  <img src="https://img.shields.io/badge/Django-5.2-blue" alt="Django">
+  <img src="https://img.shields.io/badge/DRF-3.16-blue" alt="DRF">
   <img src="https://img.shields.io/badge/PostgreSQL-15-blue" alt="PostgreSQL">
 </p>
 
