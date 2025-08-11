@@ -18,7 +18,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class SellerRegistrationSerializer(serializers.ModelSerializer):
     address = AddressSerializer(write_only=True)
     category = PrimaryKeyRelatedField(queryset=Category.objects.all())
-    category_id = serializers.IntegerField(source="category.id")
+    category_id = serializers.IntegerField(source="category.id", read_only=True)
 
     class Meta:
         model = User
@@ -43,7 +43,10 @@ class SellerRegistrationSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep["address"] = instance.address.name if instance.address else None
+        if hasattr(instance, "address") and instance.address:
+            rep["address"] = instance.address.name
+        else:
+            rep["address"] = None
         return rep
 
     def validate_phone_number(self, value):

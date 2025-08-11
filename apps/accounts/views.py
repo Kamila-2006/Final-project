@@ -24,8 +24,10 @@ class SellerRegistrationView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response_serializer = self.get_serializer(user)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 
 @custom_response
@@ -52,7 +54,7 @@ class CustomTokenVerifyView(TokenVerifyView):
 
 
 @custom_response
-class UserProfileView(generics.RetrieveAPIView):
+class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -60,6 +62,5 @@ class UserProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
-@custom_response
 class UserEditView(UserProfileView):
     pass
