@@ -24,8 +24,11 @@ class CommonSettingsAdmin(TabbedTranslationAdmin):
 @admin.register(Region)
 class RegionAdmin(TabbedTranslationAdmin):
     list_display = ["name"]
+    search_fields = ("name",)
 
 
 @admin.register(District)
 class DistrictAdmin(TabbedTranslationAdmin):
     list_display = ["name"]
+    search_fields = ("name",)
+    list_filter = ["region"]
