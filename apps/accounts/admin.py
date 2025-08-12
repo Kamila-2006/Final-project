@@ -22,6 +22,8 @@ class CustomUserAdmin(UserAdmin):
         "status",
         "phone_number",
         "profile_photo",
+        "region",
+        "district",
         "role",
         "is_active",
         "is_staff",
@@ -39,6 +41,8 @@ class CustomUserAdmin(UserAdmin):
                     "phone_number",
                     "password",
                     "role",
+                    "region",
+                    "district",
                 )
             },
         ),

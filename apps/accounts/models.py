@@ -1,4 +1,4 @@
-from common.models import BaseModel
+from common.models import BaseModel, District, Region
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from store.models import Category
@@ -35,6 +35,12 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default="pending")
+    region = models.ForeignKey(
+        Region, on_delete=models.SET_NULL, related_name="users", null=True, blank=True
+    )
+    district = models.ForeignKey(
+        District, on_delete=models.SET_NULL, related_name="users", null=True, blank=True
+    )
 
     objects = UserManager()
 
