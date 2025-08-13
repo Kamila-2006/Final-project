@@ -13,14 +13,6 @@ class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
 
 
-class CommonPagePagination(CustomLimitOffsetPagination):
-    pass
-
-
-class RegionDistrictPagination(CustomLimitOffsetPagination):
-    pass
-
-
 class CategoryPagination(CustomLimitOffsetPagination):
     pass
 
