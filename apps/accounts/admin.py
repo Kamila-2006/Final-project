@@ -22,6 +22,7 @@ class CustomUserAdmin(UserAdmin):
         "status",
         "phone_number",
         "profile_photo",
+        "address_name",
         "region",
         "district",
         "role",
@@ -29,6 +30,12 @@ class CustomUserAdmin(UserAdmin):
         "is_staff",
         "created_time",
     ]
+
+    def address_name(self, obj):
+        return obj.address.name if hasattr(obj, "address") else "-"
+
+    address_name.short_description = "Адрес"
+
     fieldsets = (
         (
             None,
@@ -41,6 +48,7 @@ class CustomUserAdmin(UserAdmin):
                     "phone_number",
                     "password",
                     "role",
+                    "address_name",
                     "region",
                     "district",
                 )
@@ -73,4 +81,4 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("full_name", "phone_number")
     ordering = ("phone_number",)
-    readonly_fields = ("created_time",)
+    readonly_fields = ("created_time", "address_name")

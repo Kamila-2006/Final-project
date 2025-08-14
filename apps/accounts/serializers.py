@@ -118,4 +118,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 setattr(address, attr, value)
             address.save()
 
+        instance.refresh_from_db()
         return instance
