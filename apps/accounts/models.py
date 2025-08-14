@@ -1,6 +1,7 @@
 from common.models import BaseModel, District, Region
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from smart_selects.db_fields import ChainedForeignKey
 from store.models import Category
 
 from .managers import UserManager
@@ -38,8 +39,16 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     region = models.ForeignKey(
         Region, on_delete=models.SET_NULL, related_name="users", null=True, blank=True
     )
-    district = models.ForeignKey(
-        District, on_delete=models.SET_NULL, related_name="users", null=True, blank=True
+    district = ChainedForeignKey(
+        District,
+        chained_field="region",
+        chained_model_field="region",
+        show_all=False,
+        auto_choose=True,
+        sort=True,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
     )
 
     objects = UserManager()

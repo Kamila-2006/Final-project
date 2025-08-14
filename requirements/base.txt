@@ -11,3 +11,4 @@ django-cleanup==9.0.0
 requests==2.32.3
 python-dotenv==1.1.0
 djangorestframework-simplejwt==5.5.0
+django-smart-selects==1.7.2

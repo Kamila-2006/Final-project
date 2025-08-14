@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "django_cleanup.apps.CleanupSelectedConfig",
     "django_filters",
+    "smart_selects",
 ]
 
 LOCAL_APPS = [
@@ -165,3 +166,5 @@ SIMPLE_JWT = {
     "USER_ID_FIELD": "guid",
     "USER_ID_CLAIM": "user_guid",
 }
+
+USE_DJANGO_JQUERY = True

@@ -65,4 +65,5 @@ if django_settings_module == "development":
             schema_view.without_ui(cache_timeout=0),
             name="schema-json",
         ),
+        path("chaining/", include("smart_selects.urls")),
     ]

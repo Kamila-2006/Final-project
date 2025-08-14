@@ -18,7 +18,7 @@ User = get_user_model()
 
 @custom_response
 class SellerRegistrationView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all().select_related("category", "region", "district", "address")
     serializer_class = SellerRegistrationSerializer
 
     def create(self, request, *args, **kwargs):
@@ -59,7 +59,9 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        return User.objects.select_related("address", "category", "region", "district").get(
+            pk=self.request.user.pk
+        )
 
 
 class UserEditView(UserProfileView):
