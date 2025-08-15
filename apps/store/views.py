@@ -1,6 +1,6 @@
 from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
 from common.utils.custom_response_decorator import custom_response
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
@@ -58,11 +58,17 @@ class AdCreateView(generics.CreateAPIView):
 
 @custom_response
 class AdDetailView(generics.RetrieveAPIView):
-    queryset = Ad.objects.select_related("seller__address", "category").prefetch_related(
-        "photos", "favourites"
-    )
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
+
+    def get_queryset(self):
+        return Ad.objects.select_related("seller__address", "category").prefetch_related(
+            "photos",
+            Prefetch(
+                "favourites",
+                queryset=FavouriteProduct.objects.only("user_id", "device_id", "product_id"),
+            ),
+        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -156,8 +162,14 @@ class FavouriteProductListView(generics.ListAPIView):
         user = self.request.user
         queryset = (
             Ad.objects.filter(favourites__user=user)
-            .select_related("seller", "seller__address", "category")
-            .prefetch_related("photos", "favourites")
+            .select_related("seller__address")
+            .prefetch_related(
+                "photos",
+                Prefetch(
+                    "favourites",
+                    queryset=FavouriteProduct.objects.only("user_id", "device_id", "product_id"),
+                ),
+            )
         )
 
         category_id = self.request.query_params.get("category")
@@ -181,14 +193,15 @@ class FavouriteProductByIDListView(generics.ListAPIView):
 
         queryset = (
             Ad.objects.filter(favourites__device_id=device_id)
-            .select_related("seller", "seller__address", "category")
-            .prefetch_related("photos", "favourites")
+            .select_related("seller__address")
+            .prefetch_related(
+                "photos",
+                Prefetch(
+                    "favourites",
+                    queryset=FavouriteProduct.objects.only("user_id", "device_id", "product_id"),
+                ),
+            )
         )
-
-        category_id = self.request.query_params.get("category")
-        if category_id:
-            queryset = queryset.filter(category_id=category_id)
-
         return queryset
 
     def get_serializer_context(self):
@@ -205,7 +218,12 @@ class MyAdsListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Ad.objects.filter(seller=user).order_by("-published_at")
+        queryset = (
+            Ad.objects.filter(seller=user)
+            .select_related("seller__address")
+            .prefetch_related("photos", "favourites")
+            .order_by("-published_at")
+        )
 
         status = self.request.query_params.get("status")
         if status in ["active", "inactive", "pending", "rejected"]:
@@ -220,7 +238,11 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Ad.objects.filter(seller=self.request.user)
+        return (
+            Ad.objects.filter(seller=self.request.user)
+            .select_related("seller__address", "category")
+            .prefetch_related("photos", "favourites")
+        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

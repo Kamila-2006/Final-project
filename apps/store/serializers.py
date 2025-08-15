@@ -46,12 +46,46 @@ class SellerShortSerializer(serializers.Serializer):
     profile_photo = serializers.ImageField()
 
 
-class AdCreateSerializer(serializers.ModelSerializer):
-    photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
+class LikedMixin:
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        user = request.user if request else None
+        device_id = None
+
+        # device_id берём либо из контекста, либо из query_params
+        if request and not user.is_authenticated:
+            device_id = request.query_params.get("device_id") or self.context.get("device_id")
+
+        favourites_qs = getattr(obj, "favourites", None)
+        if favourites_qs is None:
+            return False
+
+        # Всегда приводим к QuerySet
+        favourites_qs = favourites_qs.all()
+
+        if user and user.is_authenticated:
+            return favourites_qs.filter(user=user).exists()
+        elif device_id:
+            return favourites_qs.filter(device_id=device_id).exists()
+        return False
+
+
+class PhotoMixin(serializers.Serializer):
     photo = serializers.SerializerMethodField()
+
+    def get_photo(self, obj):
+        main_photo = next((p for p in obj.photos.all() if p.is_main), None)
+        if main_photo:
+            return main_photo.image.url
+
+        first_photo = next(iter(obj.photos.all()), None)
+        return first_photo.image.url if first_photo else None
+
+
+class AdCreateSerializer(LikedMixin, PhotoMixin, serializers.ModelSerializer):
+    photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
     address = serializers.CharField(source="seller.address.name", read_only=True)
     seller = SellerShortSerializer(read_only=True)
-    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad
@@ -102,25 +136,8 @@ class AdCreateSerializer(serializers.ModelSerializer):
         AdPhoto.objects.bulk_create([AdPhoto(ad=ad, image=url) for url in photos_data])
         return ad
 
-    def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
-        if main_photo:
-            return main_photo.image.url
 
-        first_photo = obj.photos.first()
-        if first_photo:
-            return first_photo.image.url
-
-        return None
-
-    def get_is_liked(self, obj):
-        user = self.context["request"].user
-        if not user.is_authenticated:
-            return False
-        return obj.favourites.filter(user=user).exists()
-
-
-class AdDetailSerializer(serializers.Serializer):
+class AdDetailSerializer(LikedMixin, serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     slug = serializers.SlugField()
@@ -131,15 +148,8 @@ class AdDetailSerializer(serializers.Serializer):
     address = serializers.CharField(source="seller.address.name")
     seller = SellerShortSerializer()
     category = CategoryShortSerializer()
-    is_liked = serializers.SerializerMethodField()
     view_count = serializers.IntegerField()
     updated_time = serializers.DateTimeField()
-
-    def get_is_liked(self, obj):
-        user = self.context["request"].user
-        if not user.is_authenticated:
-            return False
-        return obj.favourites.filter(user=user).exists()
 
 
 class FavouriteProductSerializer(serializers.ModelSerializer):
@@ -177,7 +187,7 @@ class FavouriteProductSerializer(serializers.ModelSerializer):
         return obj
 
 
-class FavouriteProductListSerializer(serializers.Serializer):
+class FavouriteProductListSerializer(LikedMixin, PhotoMixin, serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     slug = serializers.SlugField()
@@ -186,62 +196,19 @@ class FavouriteProductListSerializer(serializers.Serializer):
     published_at = serializers.DateTimeField()
     address = serializers.CharField(source="seller.address.name")
     seller = serializers.CharField(source="seller.full_name")
-    photo = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
     updated_time = serializers.DateTimeField()
 
-    def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
-        if main_photo:
-            return main_photo.image.url
 
-        first_photo = obj.photos.first()
-        if first_photo:
-            return first_photo.image.url
-
-        return None
-
-    def get_is_liked(self, obj):
-        user = self.context["request"].user
-        if user.is_authenticated:
-            return obj.favourites.filter(user=user).exists()
-
-        device_id = self.context.get("device_id")
-        if device_id:
-            return obj.favourites.filter(device_id=device_id).exists()
-
-        return False
-
-
-class MyAdsListSerializer(serializers.Serializer):
+class MyAdsListSerializer(LikedMixin, PhotoMixin, serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     slug = serializers.SlugField()
     price = serializers.DecimalField(max_digits=14, decimal_places=2)
-    photo = serializers.SerializerMethodField()
     published_at = serializers.DateTimeField()
     address = serializers.CharField(source="seller.address.name")
     status = serializers.CharField()
     view_count = serializers.IntegerField()
-    is_liked = serializers.SerializerMethodField()
     updated_time = serializers.DateTimeField()
-
-    def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True).first()
-        if main_photo:
-            return main_photo.image.url
-
-        first_photo = obj.photos.first()
-        if first_photo:
-            return first_photo.image.url
-
-        return None
-
-    def get_is_liked(self, obj):
-        user = self.context["request"].user
-        if not user.is_authenticated:
-            return False
-        return obj.favourites.filter(user=user).exists()
 
 
 class MyAdSerializer(serializers.ModelSerializer):
