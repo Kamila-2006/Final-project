@@ -48,3 +48,8 @@ class Setting(models.Model):
     working_hours = models.TextField()
     app_version = models.CharField(max_length=10)
     maintenance_code = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and Setting.objects.exists():
+            raise ValueError("Можно создать только один объект настроек")
+        super().save(*args, **kwargs)
