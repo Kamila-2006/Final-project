@@ -10,10 +10,6 @@ class CategorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
     icon = serializers.ImageField()
-    products_count = serializers.SerializerMethodField()
-
-    def get_products_count(self, obj):
-        return obj.ads.count()
 
 
 class ChildCategorySerializer(serializers.Serializer):
@@ -107,7 +103,7 @@ class AdCreateSerializer(serializers.ModelSerializer):
         return ad
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True)
+        main_photo = obj.photos.filter(is_main=True).first()
         if main_photo:
             return main_photo.image.url
 
@@ -151,7 +147,7 @@ class FavouriteProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FavouriteProduct
-        fields = ["id", "product", "created_at", "device_id"]
+        fields = ["id", "product", "device_id", "created_at"]
         read_only_fields = ["id", "created_at"]
         extra_kwargs = {
             "device_id": {"required": False},
@@ -195,7 +191,7 @@ class FavouriteProductListSerializer(serializers.Serializer):
     updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True)
+        main_photo = obj.photos.filter(is_main=True).first()
         if main_photo:
             return main_photo.image.url
 
@@ -231,7 +227,7 @@ class MyAdsListSerializer(serializers.Serializer):
     updated_time = serializers.DateTimeField()
 
     def get_photo(self, obj):
-        main_photo = obj.photos.filter(is_main=True)
+        main_photo = obj.photos.filter(is_main=True).first()
         if main_photo:
             return main_photo.image.url
 

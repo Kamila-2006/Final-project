@@ -1,5 +1,6 @@
 from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
 from common.utils.custom_response_decorator import custom_response
+from django.db.models import Count
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
@@ -17,13 +18,12 @@ from .serializers import (
 )
 
 
-@custom_response
 class CategoriesListView(generics.ListAPIView):
     serializer_class = CategorySerializer
     pagination_class = CategoryPagination
 
     def get_queryset(self):
-        return Category.objects.filter(parent__isnull=True)
+        return Category.objects.filter(parent__isnull=True).annotate(products_count=Count("ads"))
 
 
 @custom_response
@@ -32,7 +32,7 @@ class CategoryWithChildrenListView(generics.ListAPIView):
     pagination_class = CategoryPagination
 
     def get_queryset(self):
-        return Category.objects.filter(parent__isnull=True)
+        return Category.objects.filter(parent__isnull=True).prefetch_related("child")
 
 
 @custom_response
@@ -41,9 +41,11 @@ class SubCategoryListView(generics.ListAPIView):
     pagination_class = CategoryPagination
 
     def get_queryset(self):
-        parent_id = self.request.query_params.get("parent")
+        parent_id = self.request.query_params.get("parent_id")
         if parent_id is not None:
-            return Category.objects.filter(parent_id=parent_id)
+            return Category.objects.filter(parent_id=parent_id).annotate(
+                products_count=Count("ads")
+            )
         return Category.objects.none()
 
 
@@ -56,7 +58,9 @@ class AdCreateView(generics.CreateAPIView):
 
 @custom_response
 class AdDetailView(generics.RetrieveAPIView):
-    queryset = Ad.objects.all()
+    queryset = Ad.objects.select_related("seller__address", "category").prefetch_related(
+        "photos", "favourites"
+    )
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
 
@@ -70,7 +74,9 @@ class AdDetailView(generics.RetrieveAPIView):
 
 @custom_response
 class ProductDownloadView(generics.RetrieveAPIView):
-    queryset = Ad.objects.all()
+    queryset = Ad.objects.select_related("seller__address", "category").prefetch_related(
+        "photos", "favourites"
+    )
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
 
@@ -148,7 +154,11 @@ class FavouriteProductListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Ad.objects.filter(favourites__user=user)
+        queryset = (
+            Ad.objects.filter(favourites__user=user)
+            .select_related("seller", "seller__address", "category")
+            .prefetch_related("photos", "favourites")
+        )
 
         category_id = self.request.query_params.get("category")
         if category_id:
@@ -164,13 +174,20 @@ class FavouriteProductByIDListView(generics.ListAPIView):
 
     def get_queryset(self):
         device_id = self.request.query_params.get("device_id")
-
         if not device_id:
             raise serializers.ValidationError(
                 {"device_id": "Это поле обязательно в query-параметрах."}
             )
 
-        queryset = Ad.objects.filter(favourites__device_id=device_id)
+        queryset = (
+            Ad.objects.filter(favourites__device_id=device_id)
+            .select_related("seller", "seller__address", "category")
+            .prefetch_related("photos", "favourites")
+        )
+
+        category_id = self.request.query_params.get("category")
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
 
         return queryset
 
