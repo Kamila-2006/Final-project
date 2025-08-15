@@ -37,7 +37,7 @@
 - **Backend:** Python, Django, Django REST Framework
 - **База данных:** PostgreSQL
 - **Аутентификация:** JWT
-- **Документация API:** drf-yasg / Postman
+- **Документация API:** https://app.getpostman.com/join-team?invite_code=4a487244acacc81591f9dd8f4c2b1c2f362b498abb5f229f143b6242ac392633&target_code=470882866596abba7161dfc31de1fb4c
 
 ---
 
@@ -71,3 +71,4 @@ python manage.py runserver
 - Автор: Камила Абдурахманова  
 - GitHub: https://github.com/Kamila-2006
 - Email: abdurahmanovakamila.2006@gmail.com
+- Телефон: +998994053129
