@@ -31,7 +31,7 @@ class CategoryShortSerializer(serializers.Serializer):
 
 
 class AdPhotoSerializer(serializers.ModelSerializer):
-    product_id = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all())
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Ad.objects.all(), source="ad")
 
     class Meta:
         model = AdPhoto
