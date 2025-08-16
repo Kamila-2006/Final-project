@@ -52,7 +52,6 @@ class LikedMixin:
         user = request.user if request else None
         device_id = None
 
-        # device_id берём либо из контекста, либо из query_params
         if request and not user.is_authenticated:
             device_id = request.query_params.get("device_id") or self.context.get("device_id")
 
@@ -60,7 +59,6 @@ class LikedMixin:
         if favourites_qs is None:
             return False
 
-        # Всегда приводим к QuerySet
         favourites_qs = favourites_qs.all()
 
         if user and user.is_authenticated:
@@ -86,6 +84,7 @@ class AdCreateSerializer(LikedMixin, PhotoMixin, serializers.ModelSerializer):
     photos = serializers.ListField(child=serializers.ImageField(), write_only=True)
     address = serializers.CharField(source="seller.address.name", read_only=True)
     seller = SellerShortSerializer(read_only=True)
+    is_liked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Ad

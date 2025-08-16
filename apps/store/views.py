@@ -18,6 +18,7 @@ from .serializers import (
 )
 
 
+@custom_response
 class CategoriesListView(generics.ListAPIView):
     serializer_class = CategorySerializer
     pagination_class = CategoryPagination
