@@ -7,9 +7,11 @@ from .models import Address
 User = get_user_model()
 
 
-@admin.register(Address)
-class AddressAdmin(admin.ModelAdmin):
-    list_display = ["name", "long", "lat"]
+class AddressInline(admin.TabularInline):
+    model = Address
+    extra = 0
+    max_num = 1
+    can_delete = True
 
 
 @admin.register(User)
@@ -82,3 +84,4 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("full_name", "phone_number")
     ordering = ("phone_number",)
     readonly_fields = ("created_time", "address_name")
+    inlines = [AddressInline]
