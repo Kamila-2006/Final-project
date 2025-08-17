@@ -1,4 +1,3 @@
-# common/openapi_schema.py
 from drf_yasg import openapi
 
 # ===============================
