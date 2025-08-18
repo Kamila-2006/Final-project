@@ -368,4 +368,3 @@ class MySearchListView(generics.ListAPIView):
 
 class MySearchDeleteView(generics.DestroyAPIView):
     queryset = MySearch.objects.all()
-    lookup_field = "pk"
