@@ -359,12 +359,21 @@ class PopularsView(generics.ListAPIView):
 class MySearchCreateView(generics.CreateAPIView):
     queryset = MySearch.objects.all()
     serializer_class = MySearchCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class MySearchListView(generics.ListAPIView):
     queryset = MySearch.objects.all()
     serializer_class = MySearchListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return MySearch.objects.filter(user=self.request.user).order_by("-created_at")
 
 
 class MySearchDeleteView(generics.DestroyAPIView):
     queryset = MySearch.objects.all()
+    permission_classes = [permissions.IsAuthenticated]

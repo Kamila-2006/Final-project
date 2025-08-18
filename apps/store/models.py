@@ -116,6 +116,9 @@ class SearchCount(models.Model):
 
 
 class MySearch(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_searches"
+    )
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="my_searches")
     search_query = models.CharField(max_length=100)
     price_min = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)

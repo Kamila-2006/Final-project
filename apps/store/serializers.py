@@ -341,7 +341,7 @@ class MySearchListSerializer(serializers.Serializer):
     search_query = serializers.CharField()
     price_min = serializers.DecimalField(max_digits=14, decimal_places=2)
     price_max = serializers.DecimalField(max_digits=14, decimal_places=2)
-    region_id = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all())
+    region_id = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all(), allow_null=True)
     created_at = serializers.DateTimeField()
 
     def get_category(self, obj):
