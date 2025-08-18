@@ -292,3 +292,24 @@ class SearchCompleteSerializer(serializers.Serializer):
             return main_photo.image.url
         first_photo = obj.photos.first()
         return first_photo.image.url if first_photo else None
+
+
+class SearchCountSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source="product.id")
+    category = serializers.IntegerField(source="product.category.id")
+    search_count = serializers.IntegerField()
+    updated_at = serializers.DateTimeField()
+
+
+class PopularSearchSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source="product.id")
+    name = serializers.CharField(source="product.name")
+    icon = serializers.SerializerMethodField()
+    search_count = serializers.IntegerField()
+
+    def get_icon(self, obj):
+        main_photo = obj.product.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
+        first_photo = obj.product.photos.first()
+        return first_photo.image.url if first_photo else None

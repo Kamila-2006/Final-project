@@ -6,10 +6,11 @@ from common.pagination import (
 )
 from common.utils.custom_response_decorator import custom_response
 from django.db.models import Count, Prefetch, Q
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
-from .models import Ad, AdPhoto, Category, FavouriteProduct
+from .models import Ad, AdPhoto, Category, FavouriteProduct, SearchCount
 from .serializers import (
     AdCreateSerializer,
     AdDetailSerializer,
@@ -20,8 +21,10 @@ from .serializers import (
     FavouriteProductSerializer,
     MyAdSerializer,
     MyAdsListSerializer,
+    PopularSearchSerializer,
     SearchCategorySerializer,
     SearchCompleteSerializer,
+    SearchCountSerializer,
     SearchProductSerializer,
 )
 
@@ -325,3 +328,27 @@ class SearchCompleteView(generics.ListAPIView):
         return Ad.objects.filter(
             Q(name__icontains=q) | Q(description__icontains=q), status="active"
         ).order_by("name")
+
+
+@custom_response
+class SearchCountIncreaseView(generics.RetrieveAPIView):
+    serializer_class = SearchCountSerializer
+    queryset = Ad.objects.all()
+
+    def get_object(self):
+        product_id = self.kwargs["product_id"]
+        product = get_object_or_404(Ad, id=product_id)
+
+        search_count, created = SearchCount.objects.get_or_create(product=product)
+        search_count.search_count += 1
+        search_count.save()
+
+        return search_count
+
+
+class PopularsView(generics.ListAPIView):
+    serializer_class = PopularSearchSerializer
+    pagination_class = SearchListPagination
+
+    def get_queryset(self):
+        return SearchCount.objects.select_related("product").order_by("-search_count")
