@@ -94,3 +94,13 @@ class FavouriteProduct(models.Model):
 
     def __str__(self):
         return f"{self.user or self.device_id} - {self.product}"
+
+
+class SearchQuery(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    search_count = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

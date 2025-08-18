@@ -249,3 +249,34 @@ class MyAdSerializer(serializers.ModelSerializer):
                 AdPhoto.objects.create(ad=instance, image=photo_file)
 
         return instance
+
+
+class SearchCategorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    type = serializers.SerializerMethodField()
+    icon = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        return "category"
+
+    def get_icon(self, obj):
+        return obj.icon.url if obj.icon else None
+
+
+class SearchProductSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    type = serializers.SerializerMethodField()
+    icon = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        return "product"
+
+    def get_icon(self, obj):
+        # берём фото продукта
+        main_photo = obj.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
+        first_photo = obj.photos.first()
+        return first_photo.image.url if first_photo else None

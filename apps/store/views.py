@@ -1,6 +1,11 @@
-from common.pagination import CategoryPagination, FavouriteProductPagination, MyAdsListPagination
+from common.pagination import (
+    CategoryPagination,
+    FavouriteProductPagination,
+    MyAdsListPagination,
+    SearchListPagination,
+)
 from common.utils.custom_response_decorator import custom_response
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
@@ -15,6 +20,8 @@ from .serializers import (
     FavouriteProductSerializer,
     MyAdSerializer,
     MyAdsListSerializer,
+    SearchCategorySerializer,
+    SearchProductSerializer,
 )
 
 
@@ -254,3 +261,59 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.save(update_fields=["view_count"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+@custom_response
+class CategoryProductSearchView(generics.ListAPIView):
+    pagination_class = SearchListPagination
+
+    def get_queryset(self):
+        q = self.request.query_params.get("q", "")
+
+        categories = list(Category.objects.filter(name__icontains=q))
+        products = list(
+            Ad.objects.filter(Q(name__icontains=q) | Q(description__icontains=q), status="active")
+        )
+
+        # возвращаем Python list, не QuerySet
+        return categories + products
+
+    def paginate_queryset(self, queryset):
+        """
+        DRF ожидает QuerySet или list — list тоже можно,
+        просто надо обернуть через self.paginator
+        """
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset, self.request, view=self)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            results = []
+            for obj in page:
+                if isinstance(obj, Category):
+                    results.append(
+                        SearchCategorySerializer(obj, context=self.get_serializer_context()).data
+                    )
+                else:
+                    results.append(
+                        SearchProductSerializer(obj, context=self.get_serializer_context()).data
+                    )
+
+            return self.get_paginated_response(results)
+
+        results = []
+        for obj in queryset:
+            if isinstance(obj, Category):
+                results.append(
+                    SearchCategorySerializer(obj, context=self.get_serializer_context()).data
+                )
+            else:
+                results.append(
+                    SearchProductSerializer(obj, context=self.get_serializer_context()).data
+                )
+
+        return Response(results)
