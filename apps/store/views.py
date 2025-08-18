@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, serializers
 from rest_framework.response import Response
 
-from .models import Ad, AdPhoto, Category, FavouriteProduct, SearchCount
+from .models import Ad, AdPhoto, Category, FavouriteProduct, MySearch, SearchCount
 from .serializers import (
     AdCreateSerializer,
     AdDetailSerializer,
@@ -21,6 +21,8 @@ from .serializers import (
     FavouriteProductSerializer,
     MyAdSerializer,
     MyAdsListSerializer,
+    MySearchCreateSerializer,
+    MySearchListSerializer,
     PopularSearchSerializer,
     SearchCategorySerializer,
     SearchCompleteSerializer,
@@ -352,3 +354,18 @@ class PopularsView(generics.ListAPIView):
 
     def get_queryset(self):
         return SearchCount.objects.select_related("product").order_by("-search_count")
+
+
+class MySearchCreateView(generics.CreateAPIView):
+    queryset = MySearch.objects.all()
+    serializer_class = MySearchCreateSerializer
+
+
+class MySearchListView(generics.ListAPIView):
+    queryset = MySearch.objects.all()
+    serializer_class = MySearchListSerializer
+
+
+class MySearchDeleteView(generics.DestroyAPIView):
+    queryset = MySearch.objects.all()
+    lookup_field = "pk"

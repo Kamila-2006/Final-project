@@ -1,7 +1,9 @@
+from common.models import Region
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.relations import PrimaryKeyRelatedField
 
-from .models import Ad, AdPhoto, Category, FavouriteProduct
+from .models import Ad, AdPhoto, Category, FavouriteProduct, MySearch
 
 User = get_user_model()
 
@@ -313,3 +315,38 @@ class PopularSearchSerializer(serializers.Serializer):
             return main_photo.image.url
         first_photo = obj.product.photos.first()
         return first_photo.image.url if first_photo else None
+
+
+class MySearchCreateSerializer(serializers.ModelSerializer):
+    category = PrimaryKeyRelatedField(queryset=Category.objects.all())
+    region_id = PrimaryKeyRelatedField(queryset=Region.objects.all())
+
+    class Meta:
+        model = MySearch
+        fields = [
+            "id",
+            "category",
+            "search_query",
+            "price_min",
+            "price_max",
+            "region_id",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class MySearchListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    category = serializers.SerializerMethodField()
+    search_query = serializers.CharField()
+    price_min = serializers.DecimalField(max_digits=14, decimal_places=2)
+    price_max = serializers.DecimalField(max_digits=14, decimal_places=2)
+    region_id = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all())
+    created_at = serializers.DateTimeField()
+
+    def get_category(self, obj):
+        return {
+            "id": obj.category.id,
+            "name": obj.category.name,
+            "icon": obj.category.icon.url if obj.category.icon else None,
+        }

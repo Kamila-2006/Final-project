@@ -74,7 +74,7 @@ class FavouriteProduct(models.Model):
         null=True,
         blank=True,
     )
-    device_id = models.CharField(max_length=255, null=True, blank=True)
+    device_id = models.CharField(max_length=100, null=True, blank=True)
     product = models.ForeignKey("store.Ad", on_delete=models.CASCADE, related_name="favourites")
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -97,7 +97,7 @@ class FavouriteProduct(models.Model):
 
 
 class SearchQuery(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
@@ -113,3 +113,21 @@ class SearchCount(models.Model):
 
     def __str__(self):
         return f"{self.product.name} ({self.search_count})"
+
+
+class MySearch(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="my_searches")
+    search_query = models.CharField(max_length=100)
+    price_min = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    price_max = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    region_id = models.ForeignKey(
+        "common.Region",
+        on_delete=models.SET_NULL,
+        related_name="my_searches",
+        null=True,
+        blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.search_query} ({self.category.name})"
