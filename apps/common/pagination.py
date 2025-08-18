@@ -25,5 +25,9 @@ class MyAdsListPagination(CustomPageNumberPagination):
     pass
 
 
+class AdsListPagination(CustomPageNumberPagination):
+    pass
+
+
 class SearchListPagination(CustomLimitOffsetPagination):
     pass

@@ -1,4 +1,5 @@
 from common.pagination import (
+    AdsListPagination,
     CategoryPagination,
     FavouriteProductPagination,
     MyAdsListPagination,
@@ -7,13 +8,16 @@ from common.pagination import (
 from common.utils.custom_response_decorator import custom_response
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, permissions, serializers
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics, permissions, serializers
 from rest_framework.response import Response
 
+from .filters import AdFilter
 from .models import Ad, AdPhoto, Category, FavouriteProduct, MySearch, SearchCount
 from .serializers import (
     AdCreateSerializer,
     AdDetailSerializer,
+    AdListSerializer,
     AdPhotoSerializer,
     CategorySerializer,
     CategoryWithChildrenSerializer,
@@ -377,3 +381,25 @@ class MySearchListView(generics.ListAPIView):
 class MySearchDeleteView(generics.DestroyAPIView):
     queryset = MySearch.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+
+
+class AdListView(generics.ListAPIView):
+    serializer_class = AdListSerializer
+    pagination_class = AdsListPagination
+    queryset = Ad.objects.all().select_related("seller")
+
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ["name", "slug", "description"]
+    ordering_fields = ["price", "published_at", "updated_time"]
+    filterset_class = AdFilter
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        is_top = self.request.query_params.get("is_top")
+        if is_top:
+            qs = qs.filter(search_count_obj__search_count__gt=0).order_by(
+                "-search_count_obj__search_count"
+            )
+
+        return qs

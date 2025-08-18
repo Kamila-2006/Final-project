@@ -138,6 +138,17 @@ class AdCreateSerializer(LikedMixin, PhotoMixin, serializers.ModelSerializer):
         return ad
 
 
+class AdListSerializer(LikedMixin, PhotoMixin, serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
+    published_at = serializers.DateTimeField()
+    address = serializers.CharField(source="seller.address.name")
+    seller = SellerShortSerializer(read_only=True)
+    updated_time = serializers.DateTimeField()
+
+
 class AdDetailSerializer(LikedMixin, serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
