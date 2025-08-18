@@ -63,4 +63,5 @@ urlpatterns = [
         views.CategoryProductSearchView.as_view(),
         name="category-product-search",
     ),
+    path("search/complete/", views.SearchCompleteView.as_view(), name="search-complete"),
 ]

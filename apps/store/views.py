@@ -21,6 +21,7 @@ from .serializers import (
     MyAdSerializer,
     MyAdsListSerializer,
     SearchCategorySerializer,
+    SearchCompleteSerializer,
     SearchProductSerializer,
 )
 
@@ -275,14 +276,9 @@ class CategoryProductSearchView(generics.ListAPIView):
             Ad.objects.filter(Q(name__icontains=q) | Q(description__icontains=q), status="active")
         )
 
-        # возвращаем Python list, не QuerySet
         return categories + products
 
     def paginate_queryset(self, queryset):
-        """
-        DRF ожидает QuerySet или list — list тоже можно,
-        просто надо обернуть через self.paginator
-        """
         if self.paginator is None:
             return None
         return self.paginator.paginate_queryset(queryset, self.request, view=self)
@@ -317,3 +313,15 @@ class CategoryProductSearchView(generics.ListAPIView):
                 )
 
         return Response(results)
+
+
+@custom_response
+class SearchCompleteView(generics.ListAPIView):
+    pagination_class = SearchListPagination
+    serializer_class = SearchCompleteSerializer
+
+    def get_queryset(self):
+        q = self.request.query_params.get("q", "")
+        return Ad.objects.filter(
+            Q(name__icontains=q) | Q(description__icontains=q), status="active"
+        ).order_by("name")

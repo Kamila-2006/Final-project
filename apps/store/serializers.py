@@ -274,7 +274,19 @@ class SearchProductSerializer(serializers.Serializer):
         return "product"
 
     def get_icon(self, obj):
-        # берём фото продукта
+        main_photo = obj.photos.filter(is_main=True).first()
+        if main_photo:
+            return main_photo.image.url
+        first_photo = obj.photos.first()
+        return first_photo.image.url if first_photo else None
+
+
+class SearchCompleteSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    icon = serializers.SerializerMethodField()
+
+    def get_icon(self, obj):
         main_photo = obj.photos.filter(is_main=True).first()
         if main_photo:
             return main_photo.image.url
