@@ -1,2 +1,9 @@
 DJANGO_SETTINGS_MODULE=config.settings.development
 SECRET_KEY=your-secret-key-here
+
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=mydb
+DB_USER=myuser
+DB_PASSWORD=mypassword
+DB_HOST=localhost
+DB_PORT=5432
