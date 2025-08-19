@@ -73,4 +73,5 @@ urlpatterns = [
     path("search/populars/", views.PopularsView.as_view(), name="popular-searches"),
     path("my-search/", views.MySearchCreateView.as_view(), name="my-search-create"),
     path("my-search/list/", views.MySearchListView.as_view(), name="my-search-list"),
+    path("my-search/<int:pk>/delete/", views.MySearchDeleteView.as_view(), name="my-search-delete"),
 ]
