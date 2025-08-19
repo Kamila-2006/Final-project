@@ -1,12 +1,13 @@
 from io import BytesIO
 
 from accounts.models import User
+from common.models import Region
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from PIL import Image
 from rest_framework.test import APITestCase
 
-from store.models import Ad, Category, SearchCount
+from .models import Ad, Category, MySearch, SearchCount
 
 
 def generate_test_image():
@@ -437,7 +438,6 @@ class StoreAPITests(APITestCase):
         self.assertIsNone(response.data["data"])
 
     def test_product_download_by_slug(self):
-        # image = generate_test_image()
         ad = Ad.objects.create(
             name="iPhone 11",
             category=self.child_category,
@@ -599,3 +599,82 @@ class StoreAPITests(APITestCase):
 
         self.assertEqual(results[0]["search_count"], 4)
         self.assertEqual(results[1]["search_count"], 1)
+
+    def test_create_my_search(self):
+        category = Category.objects.create(name="Техника")
+
+        from common.models import Region
+
+        region = Region.objects.create(name="Tashkent")
+
+        url = reverse("my-search-create")
+        data = {
+            "category": category.id,
+            "search_query": "iPhone",
+            "price_min": "1000000.00",
+            "price_max": "20000000.00",
+            "region_id": region.id,
+        }
+
+        response = self.client.post(url, data, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data["success"])
+
+    def test_my_search_list(self):
+        category = Category.objects.create(name="Смартфоны")
+        from common.models import Region
+
+        region = Region.objects.create(name="Tashkent")
+
+        from store.models import MySearch
+
+        my_search = MySearch.objects.create(
+            user=self.user,
+            category=category,
+            search_query="iPhone",
+            price_min=1000000,
+            price_max=20000000,
+            region_id=region,
+        )
+
+        url = reverse("my-search-list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["success"])
+        self.assertIn("data", response.data)
+
+        results = response.data["data"]
+        self.assertEqual(len(results), 1)
+
+        search_data = results[0]
+        self.assertEqual(search_data["id"], my_search.id)
+        self.assertEqual(search_data["category"]["id"], category.id)
+        self.assertEqual(search_data["search_query"], "iPhone")
+        self.assertEqual(float(search_data["price_min"]), 1000000)
+        self.assertEqual(float(search_data["price_max"]), 20000000)
+        self.assertEqual(search_data["region_id"], region.id)
+        self.assertIn("created_at", search_data)
+
+    def test_delete_my_search(self):
+        category = Category.objects.create(name="Смартфоны")
+        region = Region.objects.create(name="Tashkent")
+
+        my_search = MySearch.objects.create(
+            user=self.user,
+            category=category,
+            search_query="iPhone",
+            price_min=1000000,
+            price_max=20000000,
+            region_id=region,
+        )
+
+        url = reverse("my-search-delete", kwargs={"pk": my_search.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertTrue(response.data["success"])
+        self.assertIsNone(response.data["data"])
+
+        self.assertFalse(MySearch.objects.filter(id=my_search.id).exists())
