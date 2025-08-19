@@ -370,6 +370,7 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 @custom_response
 class CategoryProductSearchView(generics.ListAPIView):
+    serializer_class = serializers.Serializer
     pagination_class = SearchListPagination
 
     @swagger_auto_schema(responses={200: category_product_search_response})
