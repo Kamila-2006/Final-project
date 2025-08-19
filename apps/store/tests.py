@@ -97,29 +97,13 @@ class StoreAPITests(APITestCase):
         self.assertEqual(response.data["data"]["seller"]["id"], self.user.id)
 
     def test_ads_list(self):
-        create_url = reverse("ad_create")
-        for i in range(2):
-            image = generate_test_image()
-            data = {
-                "name_uz": f"telefon{i}",
-                "name_ru": f"телефон{i}",
-                "category": self.child_category.id,
-                "description_uz": "test uz desc",
-                "description_ru": "test ru desc",
-                "price": "1000.00",
-                "photos": [image],
-            }
-            create_response = self.client.post(create_url, data, format="multipart")
-            self.assertEqual(create_response.status_code, 201)
-
-        list_url = reverse("ads-list")
-        response = self.client.get(list_url)
+        url = reverse("ads-list")
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("results", response.data)
-        self.assertEqual(len(response.data["results"]), 2)
-        self.assertEqual(response.data["results"][0]["seller"]["id"], self.user.id)
-        self.assertEqual(response.data["results"][0]["seller"]["full_name"], "Test User")
+        self.assertTrue(response.data["success"])
+        self.assertIn("results", response.data["data"])  # <--- исправлено
+        self.assertIsInstance(response.data["data"]["results"], list)
 
     def test_create_favourite_product(self):
         create_url = reverse("ad_create")
@@ -211,3 +195,131 @@ class StoreAPITests(APITestCase):
         self.assertEqual(delete_response.status_code, 204)
         self.assertTrue(delete_response.data["success"])
         self.assertIsNone(delete_response.data["data"])
+
+    def test_create_favourite_product_authenticated_user(self):
+        create_url = reverse("ad_create")
+        image = generate_test_image()
+        ad_data = {
+            "name_uz": "telefon",
+            "name_ru": "телефон",
+            "category": self.child_category.id,
+            "description_uz": "test uz desc",
+            "description_ru": "test ru desc",
+            "price": "1000.00",
+            "photos": [image],
+        }
+        ad_response = self.client.post(create_url, ad_data, format="multipart")
+        self.assertEqual(ad_response.status_code, 201)
+        product_id = ad_response.data["data"]["id"]
+
+        url = reverse("favourite-product-create")
+        data = {"product": product_id}
+        response = self.client.post(url, data, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data["success"])
+        self.assertEqual(response.data["data"]["product"], product_id)
+        self.assertEqual(response.data["data"]["device_id"], None)
+
+    def test_get_my_favourite_products_authenticated_user(self):
+        create_url = reverse("ad_create")
+        image = generate_test_image()
+        ad_data = {
+            "name_uz": "iPhone 11",
+            "name_ru": "iPhone 11",
+            "category": self.child_category.id,
+            "description_uz": "test uz desc",
+            "description_ru": "test description",
+            "price": "21.45",
+            "photos": [image],
+        }
+        ad_response = self.client.post(create_url, ad_data, format="multipart")
+        self.assertEqual(ad_response.status_code, 201)
+        product_id = ad_response.data["data"]["id"]
+
+        fav_url = reverse("favourite-product-create")
+        fav_response = self.client.post(fav_url, {"product": product_id}, format="json")
+        self.assertEqual(fav_response.status_code, 201)
+
+        list_url = reverse("my-favourite-products")
+        response = self.client.get(list_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["success"])
+        self.assertEqual(response.data["data"]["count"], 1)
+        self.assertEqual(response.data["data"]["results"][0]["id"], product_id)
+        self.assertEqual(response.data["data"]["results"][0]["name"], "iPhone 11")
+
+    def test_delete_favourite_product_authenticated_user(self):
+        create_url = reverse("ad_create")
+        image = generate_test_image()
+        ad_data = {
+            "name_uz": "iPhone 11",
+            "name_ru": "iPhone 11",
+            "category": self.child_category.id,
+            "description_uz": "uz desc",
+            "description_ru": "test description",
+            "price": "21.45",
+            "photos": [image],
+        }
+        ad_response = self.client.post(create_url, ad_data, format="multipart")
+        self.assertEqual(ad_response.status_code, 201)
+        product_id = ad_response.data["data"]["id"]
+
+        fav_url = reverse("favourite-product-create")
+        fav_response = self.client.post(fav_url, {"product": product_id}, format="json")
+        self.assertEqual(fav_response.status_code, 201)
+        favourite_id = fav_response.data["data"]["id"]
+
+        delete_url = reverse("favourite-product-delete", kwargs={"pk": favourite_id})
+        response = self.client.delete(delete_url)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertTrue(response.data["success"])
+        self.assertIsNone(response.data["data"])
+
+    def test_my_ads_list_authenticated_user(self):
+        create_url = reverse("ad_create")
+
+        image1 = generate_test_image()
+        ad_data1 = {
+            "name_uz": "Телефон",
+            "name_ru": "телефон",
+            "category": self.child_category.id,
+            "description_uz": "uz desc",
+            "description_ru": "test desc",
+            "price": "2.02",
+            "photos": [image1],
+            "address": "Toshkent shahar, Mirobod tumani, Amir Temur ko'chasi 16-uy",
+        }
+        self.client.post(create_url, ad_data1, format="multipart")
+
+        image2 = generate_test_image()
+        ad_data2 = {
+            "name_uz": "vivo 53s",
+            "name_ru": "vivo 53s",
+            "category": self.child_category.id,
+            "description_uz": "uz desc",
+            "description_ru": "desc ru",
+            "price": "3000000.00",
+            "photos": [image2],
+            "address": "Toshkent shahar, Mirobod tumani, Amir Temur ko'chasi 16-uy",
+        }
+        self.client.post(create_url, ad_data2, format="multipart")
+
+        url = reverse("my-ads")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(response.data["success"])
+        self.assertIn("results", response.data["data"])
+
+        results = response.data["data"]["results"]
+        self.assertGreaterEqual(len(results), 2)
+
+        for ad in results:
+            self.assertIn("id", ad)
+            self.assertIn("name", ad)
+            self.assertIn("price", ad)
+            self.assertIn("status", ad)

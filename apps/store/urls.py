@@ -57,7 +57,7 @@ urlpatterns = [
         views.FavouriteProductDeleteByIDView.as_view(),
         name="favourite-product-delete-by-id",
     ),
-    path("my-ads/", views.MyAdsListView.as_view(), name="my-ads-list"),
+    path("my-ads/", views.MyAdsListView.as_view(), name="my-ads"),
     path("my-ads/<int:pk>/", views.MyAdDetailView.as_view(), name="my-ad"),
     path(
         "search/category-product/",
