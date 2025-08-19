@@ -112,6 +112,7 @@ class UserProfileView(generics.RetrieveAPIView):
     responses={200: edit_response},
     tags=["Accounts"],
 )
+@custom_response
 class UserEditView(generics.UpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
