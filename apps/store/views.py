@@ -352,6 +352,7 @@ class SearchCountIncreaseView(generics.RetrieveAPIView):
         return search_count
 
 
+@custom_response
 class PopularsView(generics.ListAPIView):
     serializer_class = PopularSearchSerializer
     pagination_class = SearchListPagination
@@ -360,6 +361,7 @@ class PopularsView(generics.ListAPIView):
         return SearchCount.objects.select_related("product").order_by("-search_count")
 
 
+@custom_response
 class MySearchCreateView(generics.CreateAPIView):
     queryset = MySearch.objects.all()
     serializer_class = MySearchCreateSerializer
@@ -369,6 +371,7 @@ class MySearchCreateView(generics.CreateAPIView):
         serializer.save(user=self.request.user)
 
 
+@custom_response
 class MySearchListView(generics.ListAPIView):
     queryset = MySearch.objects.all()
     serializer_class = MySearchListSerializer
@@ -378,11 +381,13 @@ class MySearchListView(generics.ListAPIView):
         return MySearch.objects.filter(user=self.request.user).order_by("-created_at")
 
 
+@custom_response
 class MySearchDeleteView(generics.DestroyAPIView):
     queryset = MySearch.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
 
+@custom_response
 class AdListView(generics.ListAPIView):
     serializer_class = AdListSerializer
     pagination_class = AdsListPagination
