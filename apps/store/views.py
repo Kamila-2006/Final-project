@@ -9,11 +9,34 @@ from common.utils.custom_response_decorator import custom_response
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, permissions, serializers
 from rest_framework.response import Response
 
 from .filters import AdFilter
 from .models import Ad, AdPhoto, Category, FavouriteProduct, MySearch, SearchCount
+from .openapi_schema import (
+    ad_create_response,
+    ad_detail_response,
+    ad_list_filter_params,
+    ad_list_response,
+    categories_list_response,
+    categories_with_children_response,
+    category_product_search_response,
+    favourite_create_response,
+    favourite_list_response,
+    my_ad_detail_response,
+    my_ads_list_response,
+    mysearch_create_response,
+    mysearch_delete_response,
+    mysearch_list_response,
+    popular_search_response,
+    product_download_response,
+    product_image_create_response,
+    search_complete_response,
+    search_count_increase_response,
+    subcategories_list_response,
+)
 from .serializers import (
     AdCreateSerializer,
     AdDetailSerializer,
@@ -43,6 +66,10 @@ class CategoriesListView(generics.ListAPIView):
     def get_queryset(self):
         return Category.objects.filter(parent__isnull=True).annotate(products_count=Count("ads"))
 
+    @swagger_auto_schema(responses={200: categories_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 @custom_response
 class CategoryWithChildrenListView(generics.ListAPIView):
@@ -51,6 +78,10 @@ class CategoryWithChildrenListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Category.objects.filter(parent__isnull=True).prefetch_related("child")
+
+    @swagger_auto_schema(responses={200: categories_with_children_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 @custom_response
@@ -66,12 +97,20 @@ class SubCategoryListView(generics.ListAPIView):
             )
         return Category.objects.none()
 
+    @swagger_auto_schema(responses={200: subcategories_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 @custom_response
 class AdCreateView(generics.CreateAPIView):
     queryset = Ad.objects.all()
     serializer_class = AdCreateSerializer
     pagination_class = CategoryPagination
+
+    @swagger_auto_schema(responses={201: ad_create_response})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 @custom_response
@@ -87,6 +126,14 @@ class AdDetailView(generics.RetrieveAPIView):
                 queryset=FavouriteProduct.objects.only("user_id", "device_id", "product_id"),
             ),
         )
+
+    @swagger_auto_schema(responses={200: ad_detail_response})
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.view_count += 1
+        instance.save(update_fields=["view_count"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -104,6 +151,14 @@ class ProductDownloadView(generics.RetrieveAPIView):
     serializer_class = AdDetailSerializer
     lookup_field = "slug"
 
+    @swagger_auto_schema(responses={200: product_download_response})
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.view_count += 1
+        instance.save(update_fields=["view_count"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.view_count += 1
@@ -117,12 +172,20 @@ class ProductImageCreateView(generics.CreateAPIView):
     queryset = AdPhoto.objects.all()
     serializer_class = AdPhotoSerializer
 
+    @swagger_auto_schema(responses={201: product_image_create_response})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 @custom_response
 class FavouriteProductCreateView(generics.CreateAPIView):
     queryset = FavouriteProduct.objects.all()
     serializer_class = FavouriteProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(responses={201: favourite_create_response})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -132,6 +195,10 @@ class FavouriteProductCreateView(generics.CreateAPIView):
 class FavouriteProductCreateByIDView(generics.CreateAPIView):
     queryset = FavouriteProduct.objects.all()
     serializer_class = FavouriteProductSerializer
+
+    @swagger_auto_schema(responses={201: favourite_create_response})
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         device_id = self.request.data.get("device_id")
@@ -179,6 +246,10 @@ class FavouriteProductListView(generics.ListAPIView):
     pagination_class = FavouriteProductPagination
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: favourite_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         queryset = (
@@ -204,6 +275,10 @@ class FavouriteProductListView(generics.ListAPIView):
 class FavouriteProductByIDListView(generics.ListAPIView):
     serializer_class = FavouriteProductListSerializer
     pagination_class = FavouriteProductPagination
+
+    @swagger_auto_schema(responses={200: favourite_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         device_id = self.request.query_params.get("device_id")
@@ -237,6 +312,10 @@ class MyAdsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MyAdsListPagination
 
+    @swagger_auto_schema(responses={200: my_ads_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         user = self.request.user
         queryset = (
@@ -258,6 +337,22 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MyAdSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: my_ad_detail_response, 204: "Deleted successfully"})
+    def get(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(responses={200: my_ad_detail_response})
+    def put(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @swagger_auto_schema(responses={200: my_ad_detail_response})
+    def patch(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(responses={204: "Deleted successfully"})
+    def delete(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
     def get_queryset(self):
         return (
             Ad.objects.filter(seller=self.request.user)
@@ -276,6 +371,10 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
 @custom_response
 class CategoryProductSearchView(generics.ListAPIView):
     pagination_class = SearchListPagination
+
+    @swagger_auto_schema(responses={200: category_product_search_response})
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
@@ -329,6 +428,10 @@ class SearchCompleteView(generics.ListAPIView):
     pagination_class = SearchListPagination
     serializer_class = SearchCompleteSerializer
 
+    @swagger_auto_schema(responses={200: search_complete_response})
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
         return Ad.objects.filter(
@@ -340,6 +443,10 @@ class SearchCompleteView(generics.ListAPIView):
 class SearchCountIncreaseView(generics.RetrieveAPIView):
     serializer_class = SearchCountSerializer
     queryset = Ad.objects.all()
+
+    @swagger_auto_schema(responses={200: search_count_increase_response})
+    def get(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     def get_object(self):
         product_id = self.kwargs["product_id"]
@@ -357,6 +464,10 @@ class PopularsView(generics.ListAPIView):
     serializer_class = PopularSearchSerializer
     pagination_class = SearchListPagination
 
+    @swagger_auto_schema(responses={200: popular_search_response})
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         return SearchCount.objects.select_related("product").order_by("-search_count")
 
@@ -366,6 +477,10 @@ class MySearchCreateView(generics.CreateAPIView):
     queryset = MySearch.objects.all()
     serializer_class = MySearchCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(responses={200: mysearch_create_response})
+    def post(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -377,6 +492,10 @@ class MySearchListView(generics.ListAPIView):
     serializer_class = MySearchListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: mysearch_list_response})
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         return MySearch.objects.filter(user=self.request.user).order_by("-created_at")
 
@@ -385,6 +504,10 @@ class MySearchListView(generics.ListAPIView):
 class MySearchDeleteView(generics.DestroyAPIView):
     queryset = MySearch.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(responses={200: mysearch_delete_response})
+    def delete(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 @custom_response
@@ -408,3 +531,7 @@ class AdListView(generics.ListAPIView):
             )
 
         return qs
+
+    @swagger_auto_schema(responses={200: ad_list_response}, manual_parameters=ad_list_filter_params)
+    def get(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
