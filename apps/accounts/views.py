@@ -39,7 +39,7 @@ class SellerRegistrationView(generics.CreateAPIView):
     @swagger_auto_schema(
         request_body=seller_registration_request,
         responses={201: seller_registration_response},
-        tags=["Accounts"],
+        tags=["accounts"],
         operation_summary="Seller Registration",
         operation_description=(
             "Регистрация нового продавца с адресом, категорией и номером телефона."
@@ -57,7 +57,7 @@ class SellerRegistrationView(generics.CreateAPIView):
 @swagger_auto_schema(
     request_body=login_request,
     responses={200: login_response},
-    tags=["Accounts"],
+    tags=["accounts"],
     operation_summary="User Login",
     operation_description=(
         "Авторизация пользователя по номеру телефона и паролю. "
@@ -75,7 +75,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     @swagger_auto_schema(
         request_body=token_refresh_request,
         responses={200: token_refresh_response},
-        tags=["Accounts"],
+        tags=["accounts"],
         operation_summary="Refresh JWT Token",
         operation_description="Обновление Access токена с помощью Refresh токена.",
     )
@@ -89,7 +89,7 @@ class CustomTokenVerifyView(TokenVerifyView):
     @swagger_auto_schema(
         request_body=token_verify_request,
         responses={200: token_verify_response},
-        tags=["Accounts"],
+        tags=["accounts"],
         operation_summary="Verify JWT Token",
         operation_description=(
             "Проверка валидности JWT токена. Если токен валидный, возвращает user_id."
@@ -119,7 +119,7 @@ class UserProfileView(generics.RetrieveAPIView):
 
     @swagger_auto_schema(
         responses={200: me_response},
-        tags=["Accounts"],
+        tags=["accounts"],
     )
     def get_object(self):
         return User.objects.select_related("address", "category", "region", "district").get(
@@ -140,7 +140,7 @@ class UserEditView(generics.UpdateAPIView):
     @swagger_auto_schema(
         request_body=edit_put_request,
         responses={200: edit_response},
-        tags=["Accounts"],
+        tags=["accounts"],
         operation_summary="Edit user profile (full update)",
         operation_description="Полностью обновляет профиль пользователя.",
     )
@@ -150,7 +150,7 @@ class UserEditView(generics.UpdateAPIView):
     @swagger_auto_schema(
         request_body=edit_patch_request,
         responses={200: edit_response},
-        tags=["Accounts"],
+        tags=["accounts"],
         operation_summary="Edit user profile (partial update)",
         operation_description="Частично обновляет профиль пользователя.",
     )
