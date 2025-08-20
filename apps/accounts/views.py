@@ -30,16 +30,16 @@ from .serializers import (
 User = get_user_model()
 
 
-@swagger_auto_schema(
-    request_body=seller_registration_request,
-    responses={201: seller_registration_response},
-    tags=["Accounts"],
-)
 @custom_response
 class SellerRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all().select_related("category", "region", "district", "address")
     serializer_class = SellerRegistrationSerializer
 
+    @swagger_auto_schema(
+        request_body=seller_registration_request,
+        responses={201: seller_registration_response},
+        tags=["Accounts"],
+    )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -69,13 +69,14 @@ class CustomTokenRefreshView(TokenRefreshView):
     pass
 
 
-@swagger_auto_schema(
-    request_body=token_verify_request,
-    responses={200: token_verify_response},
-    tags=["Accounts"],
-)
 @custom_response
 class CustomTokenVerifyView(TokenVerifyView):
+
+    @swagger_auto_schema(
+        request_body=token_verify_request,
+        responses={200: token_verify_response},
+        tags=["Accounts"],
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
@@ -92,31 +93,31 @@ class CustomTokenVerifyView(TokenVerifyView):
             )
 
 
-@swagger_auto_schema(
-    responses={200: me_response},
-    tags=["Accounts"],
-)
 @custom_response
 class UserProfileView(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        responses={200: me_response},
+        tags=["Accounts"],
+    )
     def get_object(self):
         return User.objects.select_related("address", "category", "region", "district").get(
             pk=self.request.user.pk
         )
 
 
-@swagger_auto_schema(
-    request_body=edit_request,
-    responses={200: edit_response},
-    tags=["Accounts"],
-)
 @custom_response
 class UserEditView(generics.UpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        request_body=edit_request,
+        responses={200: edit_response},
+        tags=["Accounts"],
+    )
     def get_object(self):
         return User.objects.select_related("address", "category", "region", "district").get(
             pk=self.request.user.pk
