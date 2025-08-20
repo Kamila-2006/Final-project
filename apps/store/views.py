@@ -370,12 +370,11 @@ class MyAdDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 @custom_response
 class CategoryProductSearchView(generics.ListAPIView):
-    serializer_class = serializers.Serializer
     pagination_class = SearchListPagination
 
     @swagger_auto_schema(responses={200: category_product_search_response})
     def get(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
 
     def get_queryset(self):
         q = self.request.query_params.get("q", "")
@@ -400,26 +399,18 @@ class CategoryProductSearchView(generics.ListAPIView):
             results = []
             for obj in page:
                 if isinstance(obj, Category):
-                    results.append(
-                        SearchCategorySerializer(obj, context=self.get_serializer_context()).data
-                    )
+                    results.append(SearchCategorySerializer(obj).data)
                 else:
-                    results.append(
-                        SearchProductSerializer(obj, context=self.get_serializer_context()).data
-                    )
+                    results.append(SearchProductSerializer(obj).data)
 
             return self.get_paginated_response(results)
 
         results = []
         for obj in queryset:
             if isinstance(obj, Category):
-                results.append(
-                    SearchCategorySerializer(obj, context=self.get_serializer_context()).data
-                )
+                results.append(SearchCategorySerializer(obj).data)
             else:
-                results.append(
-                    SearchProductSerializer(obj, context=self.get_serializer_context()).data
-                )
+                results.append(SearchProductSerializer(obj).data)
 
         return Response(results)
 

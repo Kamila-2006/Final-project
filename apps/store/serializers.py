@@ -264,11 +264,13 @@ class MyAdSerializer(serializers.ModelSerializer):
         return instance
 
 
-class SearchCategorySerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
+class SearchCategorySerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ("id", "name", "type", "icon")
 
     def get_type(self, obj):
         return "category"
@@ -277,11 +279,13 @@ class SearchCategorySerializer(serializers.Serializer):
         return obj.icon.url if obj.icon else None
 
 
-class SearchProductSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField()
+class SearchProductSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     icon = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ad
+        fields = ("id", "name", "type", "icon")
 
     def get_type(self, obj):
         return "product"

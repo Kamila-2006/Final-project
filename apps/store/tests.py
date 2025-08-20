@@ -12,7 +12,7 @@ from .models import Ad, Category, MySearch, SearchCount
 
 def generate_test_image():
     file = BytesIO()
-    image = Image.new("RGB", (100, 100), "blue")  # просто синяя картинка
+    image = Image.new("RGB", (100, 100), "blue")
     image.save(file, "JPEG")
     file.seek(0)
     return SimpleUploadedFile("test.jpg", file.read(), content_type="image/jpeg")
@@ -495,18 +495,18 @@ class StoreAPITests(APITestCase):
         self.assertIn("id", data_resp)
         self.assertIn("created_at", data_resp)
 
-    # def test_category_product_search_by_query(self):
-    #     Category.objects.create(name="Техника")
-    #     Category.objects.create(name="Смартфоны")
-    #
-    #     url = reverse("category-product-search")
-    #     response = self.client.get(url, {"q": "Техника"})
-    #
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTrue(response.data["success"])
-    #     self.assertIn("results", response.data["data"])
-    #     self.assertEqual(len(response.data["data"]["results"]), 2)
-    #     self.assertEqual(response.data["data"]["results"][0]["name"], "Техника")
+    def test_category_product_search_by_query(self):
+        Category.objects.create(name="Техника")
+        Category.objects.create(name="Смартфоны")
+
+        url = reverse("category-product-search")
+        response = self.client.get(url, {"q": "Техника"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["success"])
+        self.assertIn("results", response.data["data"])
+        self.assertEqual(len(response.data["data"]["results"]), 2)
+        self.assertEqual(response.data["data"]["results"][0]["name"], "Техника")
 
     def test_complete_search_by_query(self):
         Ad.objects.create(
