@@ -9,7 +9,8 @@ from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .openapi_schema import (
-    edit_request,
+    edit_patch_request,
+    edit_put_request,
     edit_response,
     login_request,
     login_response,
@@ -39,6 +40,10 @@ class SellerRegistrationView(generics.CreateAPIView):
         request_body=seller_registration_request,
         responses={201: seller_registration_response},
         tags=["Accounts"],
+        operation_summary="Seller Registration",
+        operation_description=(
+            "Регистрация нового продавца с адресом, категорией и номером телефона."
+        ),
     )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -53,20 +58,29 @@ class SellerRegistrationView(generics.CreateAPIView):
     request_body=login_request,
     responses={200: login_response},
     tags=["Accounts"],
+    operation_summary="User Login",
+    operation_description=(
+        "Авторизация пользователя по номеру телефона и паролю. "
+        "Возвращает JWT access/refresh токены и данные пользователя."
+    ),
 )
 @custom_response
 class CustomLoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-@swagger_auto_schema(
-    request_body=token_refresh_request,
-    responses={200: token_refresh_response},
-    tags=["Accounts"],
-)
 @custom_response
 class CustomTokenRefreshView(TokenRefreshView):
-    pass
+
+    @swagger_auto_schema(
+        request_body=token_refresh_request,
+        responses={200: token_refresh_response},
+        tags=["Accounts"],
+        operation_summary="Refresh JWT Token",
+        operation_description="Обновление Access токена с помощью Refresh токена.",
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 @custom_response
@@ -76,6 +90,10 @@ class CustomTokenVerifyView(TokenVerifyView):
         request_body=token_verify_request,
         responses={200: token_verify_response},
         tags=["Accounts"],
+        operation_summary="Verify JWT Token",
+        operation_description=(
+            "Проверка валидности JWT токена. Если токен валидный, возвращает user_id."
+        ),
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -97,6 +115,7 @@ class CustomTokenVerifyView(TokenVerifyView):
 class UserProfileView(generics.RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
 
     @swagger_auto_schema(
         responses={200: me_response},
@@ -113,12 +132,27 @@ class UserEditView(generics.UpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        request_body=edit_request,
-        responses={200: edit_response},
-        tags=["Accounts"],
-    )
     def get_object(self):
         return User.objects.select_related("address", "category", "region", "district").get(
             pk=self.request.user.pk
         )
+
+    @swagger_auto_schema(
+        request_body=edit_put_request,
+        responses={200: edit_response},
+        tags=["Accounts"],
+        operation_summary="Edit user profile (full update)",
+        operation_description="Полностью обновляет профиль пользователя.",
+    )
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        request_body=edit_patch_request,
+        responses={200: edit_response},
+        tags=["Accounts"],
+        operation_summary="Edit user profile (partial update)",
+        operation_description="Частично обновляет профиль пользователя.",
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
