@@ -11,7 +11,7 @@ class CategoryAdmin(TabbedTranslationAdmin):
     list_filter = ("parent",)
 
 
-class AdPhotoInline(admin.TabularInline):  # Можно также StackedInline
+class AdPhotoInline(admin.TabularInline):
     model = AdPhoto
     extra = 1
     fields = ["image", "is_main", "created_at"]
