@@ -226,7 +226,7 @@ class FavouriteProductDeleteByIDView(generics.DestroyAPIView):
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
-            return FavouriteProduct.objects.none()  # пустой queryset, чисто для Swagger
+            return FavouriteProduct.objects.none()
 
         device_id = self.request.query_params.get("device_id")
         if not device_id:

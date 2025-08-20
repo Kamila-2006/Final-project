@@ -1,3 +1,4 @@
+import uuid
 from io import BytesIO
 
 from accounts.models import User
@@ -7,7 +8,7 @@ from django.urls import reverse
 from PIL import Image
 from rest_framework.test import APITestCase
 
-from .models import Ad, Category, MySearch, SearchCount
+from .models import Ad, Category, FavouriteProduct, MySearch, SearchCount
 
 
 def generate_test_image():
@@ -163,6 +164,39 @@ class StoreAPITests(APITestCase):
         self.assertEqual(response.data["data"]["results"][0]["id"], product_id)
         self.assertEqual(response.data["data"]["results"][0]["name"], "Айфон")
 
+    def test_delete_favourite_product(self):
+        create_url = reverse("ad_create")
+        image = generate_test_image()
+        ad_data = {
+            "name_uz": "telefon",
+            "name_ru": "телефон",
+            "category": self.child_category.id,
+            "description_uz": "test uz desc",
+            "description_ru": "test ru desc",
+            "price": "1000.00",
+            "photos": [image],
+        }
+        ad_response = self.client.post(create_url, ad_data, format="multipart")
+        self.assertEqual(ad_response.status_code, 201)
+        product_id = ad_response.data["data"]["id"]
+
+        self.client.force_authenticate(user=None)
+
+        fav_url = reverse("favourite-product-create-by-id")
+        fav_data = {
+            "device_id": "1234567890testdevice",
+            "product": product_id,
+        }
+        fav_response = self.client.post(fav_url, fav_data, format="json")
+        self.assertEqual(fav_response.status_code, 201)
+
+        delete_url = reverse("favourite-product-delete-by-id", kwargs={"pk": product_id})
+        delete_response = self.client.delete(f"{delete_url}?device_id=1234567890testdevice")
+
+        self.assertEqual(delete_response.status_code, 204)
+        self.assertTrue(delete_response.data["success"])
+        self.assertIsNone(delete_response.data["data"])
+
     def test_create_favourite_product_authenticated_user(self):
         create_url = reverse("ad_create")
         image = generate_test_image()
@@ -216,6 +250,42 @@ class StoreAPITests(APITestCase):
         self.assertEqual(response.data["data"]["count"], 1)
         self.assertEqual(response.data["data"]["results"][0]["id"], product_id)
         self.assertEqual(response.data["data"]["results"][0]["name"], "iPhone 11")
+
+    def test_delete_favourite_product_authenticated(self):
+        create_url = reverse("ad_create")
+        image = generate_test_image()
+        ad_data = {
+            "name_uz": "telefon",
+            "name_ru": "телефон",
+            "category": self.child_category.id,
+            "description_uz": "test uz desc",
+            "description_ru": "test ru desc",
+            "price": "1000.00",
+            "photos": [image],
+        }
+        ad_response = self.client.post(create_url, ad_data, format="multipart")
+        self.assertEqual(ad_response.status_code, 201)
+        product_id = ad_response.data["data"]["id"]
+
+        phone_number = "9989" + str(uuid.uuid4().int)[:7]
+        user = User.objects.create_user(
+            phone_number=phone_number,
+            password="strongpassword",
+        )
+        self.client.force_authenticate(user=user)
+
+        fav = FavouriteProduct.objects.create(user=user, product_id=product_id)
+
+        delete_url = reverse("favourite-product-delete", kwargs={"pk": product_id})
+        delete_response = self.client.delete(delete_url)
+
+        self.assertEqual(delete_response.status_code, 204)
+        self.assertTrue(delete_response.data["success"])
+        self.assertIsNone(delete_response.data["data"])
+        self.assertFalse(
+            FavouriteProduct.objects.filter(id=fav.id).exists(),
+            "FavouriteProduct не удалился из базы",
+        )
 
     def test_my_ads_list_authenticated_user(self):
         create_url = reverse("ad_create")
